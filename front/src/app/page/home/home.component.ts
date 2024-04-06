@@ -80,14 +80,14 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  villagerVote(isWolf: boolean, player: Player) {
+  playerVote(isWolf: boolean, player?: Player) {
 
-    const subscribtionCall2 = (response: EventResponse) => {
+    const subscribtionCall = (response: EventResponse) => {
 
       const myPlayer = this.players.find(p => p.name === response.name);
       this.messages.push(`MJ: ${response.message} ${response.name}`);
 
-      response.reasons.forEach(reason => {
+      response.reasons?.forEach(reason => {
         if(reason.reason !== "" && reason.playerName !== ""){
           this.messages.push(`${reason.playerName} : ${reason.reason}`);
         }
@@ -101,35 +101,19 @@ export class HomeComponent implements OnInit {
     }
 
     if(this.gameStatus === gameStatus.running){
-      this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
       const filteredPlayers = this.players.filter(player => !player.isDead)
-
-      this.apiService.getDay(filteredPlayers, player.name).subscribe(subscribtionCall2);
+      if(isWolf){
+        if(player){
+          this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
+        }
+        this.apiService.getNight(filteredPlayers, player?.name).subscribe(subscribtionCall);
+      }
+      if(!isWolf && player){
+        this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
+        this.apiService.getDay(filteredPlayers, player.name).subscribe(subscribtionCall);
+      }
     }
   };
-
-  wolfVote(player?: Player){
-
-    const subscribtionCall2 = (response: EventResponse) => {
-
-      const myPlayer = this.players.find(p => p.name === response.name);
-      this.messages.push(`MJ: ${response.message} ${response.name}`);
-
-      if(myPlayer){
-        myPlayer.isDead = true;
-        const filteredPlayers = this.players.filter(player => !player.isDead)
-        this.gameStatus = checkIfGameIsOver(filteredPlayers);
-      }
-    }
-
-    if(this.gameStatus === gameStatus.running){
-      if(player){
-        this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
-      }
-      const filteredPlayers = this.players.filter(player => !player.isDead)
-      this.apiService.getNight(filteredPlayers, player?.name).subscribe(subscribtionCall2);
-    }
-  }
 
   goToNight(){
     if(this.playerPower === Power.Loup){
@@ -137,7 +121,7 @@ export class HomeComponent implements OnInit {
       this.gameStep = GameStep.loups;
     }
     else{
-      this.wolfVote();
+      this.playerVote(true);
     }
   }
 
@@ -156,11 +140,11 @@ export class HomeComponent implements OnInit {
         this.gameStep = GameStep.jour;
         break;*/
         case GameStep.jour:
-          this.villagerVote(player);
+          this.playerVote(false, player);
           this.goToNight();
           break;
         case GameStep.loups:
-          this.wolfVote(player);
+          this.playerVote(true, player);
           this.instruction = "Votez pour tuer un loup :";
           this.gameStep = GameStep.jour;
           break;
