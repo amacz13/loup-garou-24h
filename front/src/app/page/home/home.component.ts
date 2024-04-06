@@ -1,22 +1,88 @@
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 interface Player {
   name: string;
   image: string;
+  role: string;
+  isDead: boolean;
 }
 
 @Component({
-  standalone:true,
+  standalone: true,
   selector: 'home-root',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports:[FormsModule, NgFor]
+  imports:[FormsModule, NgFor, NgIf]
 })
 export class HomeComponent {
   messages: string[] = [];
   newMessage: string = '';
+  players: Player[] = [];
+  gameStatus: "running" | "villagersWon" | "werewolfesWon" = "running";
+
+  constructor() {
+    this.initializeGame();
+  }
+
+  initializePlayers() {
+    // Define player names and images
+    const playerNames = ['Aphrodite', 'Apollon', 'Arès', 'Artémis', 'Athéna', 'Hadès', 'Hermès', 'Poséidon'];
+    const playerImages = ['aphrodite.png', 'apollo.png', 'ares.png', 'artemis.png', 'athena.png', 'hades.png', 'hermes.png', 'poseidon.png'];
+
+    // Shuffle player names and images to assign random roles
+    const shuffledNames = this.shuffleArray(playerNames);
+    const shuffledImages = this.shuffleArray(playerImages);
+
+    // Assign roles to players
+    for (let i = 0; i < playerNames.length; i++) {
+      const role = this.assignRole(i);
+      this.players.push({ name: shuffledNames[i], image: 'assets/characters/' + shuffledImages[i], role: role, isDead: false });
+    }
+  }
+
+  initializeGame() {
+    this.messages= [];
+    this.newMessage= '';
+    this.players = [];
+    this.gameStatus = "running";
+    this.initializePlayers();
+    this.startGame();
+  }
+
+  checkIfGameIsOver(){
+    const remainingVillagers = this.players.find(p =>
+      p.isDead === false && p.role === 'Villager'
+    );
+
+    if(!remainingVillagers){
+      this.gameStatus = "werewolfesWon"
+    }
+
+    const remainingWerewolfes = this.players.find(p =>
+      p.isDead === false && p.role === 'Werewolf'
+    );
+    if(!remainingWerewolfes){
+      this.gameStatus = "villagersWon"
+    }
+  }
+
+  // Function to shuffle arrays
+  shuffleArray(array: any[]): any[] {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  // Function to assign roles
+  assignRole(index: number): string {
+    // Logic to assign roles based on index or any other criteria
+    // For example, assign Werewolf role to first 2 players, Seer role to the third player, etc.
+    if (index < 2) {
+      return 'Werewolf';
+    } else {
+      return 'Villager';
+    }
+  }
 
   sendMessage() {
     if (this.newMessage.trim() !== '') {
@@ -25,21 +91,43 @@ export class HomeComponent {
     }
   }
 
-  vote() {
-    // Logic to vote against a player
-    console.log("Voting against a player...");
+  vote(player: Player) {
+    const myPlayer = this.players.find(p => p.name === player.name);
+    if(myPlayer){
+      myPlayer.isDead = true;
+      this.checkIfGameIsOver();
+    }
   }
 
-  players: Player[] = [
-    { name: 'Aphrodite', image: 'assets/characters/aphrodite.png' },
-    { name: 'Apollon', image: 'assets/characters/apollo.png' },
-    { name: 'Arès', image: 'assets/characters/ares.png' },
-    { name: 'Artémis', image: 'assets/characters/artemis.png' },
-    { name: 'Athéna', image: 'assets/characters/athena.png' },
-    { name: 'Hadès', image: 'assets/characters/hades.png' },
-    { name: 'Hermès', image: 'assets/characters/hermes.png' },
-    { name: 'Poséidon', image: 'assets/characters/poseidon.png' },
-    { name: 'Prométhée', image: 'assets/characters/prometheus.png' },
-  ];
-}
+  getAnswer(): Promise<string> {
+    return new Promise<string>((resolve) => {
+      setTimeout(() => {
+        const alivePlayers = this.players.filter(player => !player.isDead); // Filter out dead players
+        if (alivePlayers.length === 0) {
+          resolve("No living players available");
+        } else {
+          const randomIndex = Math.floor(Math.random() * alivePlayers.length); // Generate a random index
+          const randomPlayerName = alivePlayers[randomIndex].name; // Get the player name at the random index
+          resolve(randomPlayerName); // Resolve the promise with the random player name
+        }
+      }, 2000); // 2000 milliseconds = 2 seconds
+    });
+  }
 
+  getAnswerRecursively() {
+    this.getAnswer().then((response) => {
+      const myPlayer = this.players.find(p => p.name === response);
+      if(myPlayer){
+        myPlayer.isDead = true;
+        this.checkIfGameIsOver();
+      }
+      if(this.gameStatus === "running"){
+        this.getAnswerRecursively();
+      }
+    });
+  }
+
+  startGame(): void {
+    this.getAnswerRecursively();
+  }
+}
