@@ -135,7 +135,7 @@ export class HomeComponent implements OnInit {
 
   startGame(): void {
     //this.getAnswerRecursively();
-    this.apiService.getDay(this.players).subscribe((res) => {
+    this.apiService.getNight(this.players).subscribe((res) => {
       console.log(res);
     });
   }

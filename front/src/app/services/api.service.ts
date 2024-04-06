@@ -8,8 +8,8 @@ import { Player } from "../entity/player.model";
 export class ApiService {
 
   private url: string = '/api/';
-  private night: string = 'jour';
-  private day: string = 'nuit';
+  private night: string = 'nuit';
+  private day: string = 'jour';
   constructor(private httpClient: HttpClient) {}
 
   getNight(players: Player[]) {
@@ -17,7 +17,7 @@ export class ApiService {
   }
 
   getDay(players: Player[]) {
-    return this.httpClient.post(this.url + this.day, players);
+    return this.httpClient.post(this.url + this.day, {players: players});
   }
 
 }
