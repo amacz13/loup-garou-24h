@@ -24,5 +24,5 @@ const playersTest: Player[] = [
     }
 ];
 
-//doDayVote(playersTest).then(result => console.log('Résultat du vote de jour : ', result));
-doNightVote(playersTest).then(result => console.log('Résultat du vote de nuit : ', result));
+doDayVote(playersTest).then(result => console.log('Résultat du vote de jour : ', result));
+//doNightVote(playersTest).then(result => console.log('Résultat du vote de nuit : ', result));
