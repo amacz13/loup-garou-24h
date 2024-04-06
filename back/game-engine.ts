@@ -20,14 +20,14 @@ export async function doDayVote(playerList: Player[]): Promise<Player[]> {
     const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
 
-    for (const player of players) {
+    for (const player of playerList) {
         console.log(`-> C'est à ${player.name} de voter !`);
         const model = await llama.loadModel({
             modelPath: path.join(__dirname, "models", "zephyr-7b-beta.Q4_K_M.gguf")
         });
         const plContext = await model.createContext({batchSize: 0});
         const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
-        const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? players.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : players.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
+        const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
         const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.4});
         console.log("playerRes",playerRes)
         const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
@@ -111,7 +111,7 @@ export async function doNightVote(playerList: Player[]): Promise<Player[]> {
     return invertedVoteMap.get(maxVote);
 }
 
-const players: Player[] = [
+const playersTest: Player[] = [
     {
         name: "Léa",
         role: 'Villageois',
@@ -137,5 +137,5 @@ const players: Player[] = [
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value);
 
-//doDayVote(players);
-doNightVote(players);
+//doDayVote(playersTest);
+//doNightVote(playersTest);
