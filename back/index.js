@@ -2,6 +2,7 @@ import {fileURLToPath} from "url";
 import path from "path";
 import {LlamaModel, LlamaContext, LlamaChatSession} from "node-llama-cpp";
 import PromptSync from "prompt-sync";
+import { Express } from "express";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
