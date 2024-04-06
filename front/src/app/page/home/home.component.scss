@@ -60,23 +60,25 @@ input[type="text"], button {
   margin-bottom: 1rem;
 }
 
-/* Add this at the end of your existing SCSS file */
-
 .players {
   .player-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 1.8rem;
   }
 
   .player {
     position: relative;
-    background: none;
-    border: none;
+    background: hsla(43, 84%, 85%, 1);
+    background: linear-gradient(315deg, hsla(43, 84%, 85%, 1) 0%, hsla(325, 71%, 70%, 1) 50%, hsla(236, 67%, 55%, 1) 100%);
+    border-radius: 0.5rem;
+    border: 0.4rem solid #000A45;
+    filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
+    padding: 0.5rem;
 
     .player-img {
       width: 100%;
-      border-radius: 5px;
+      border-radius: 0.5rem;
       transition: transform 0.3s ease;
       cursor: pointer;
 
@@ -93,13 +95,12 @@ input[type="text"], button {
       height: 100%;
       background-color: rgba(255, 0, 0, 0.7);
       color: #fff;
-      font-size: 1.5rem;
       display: flex;
       justify-content: center;
       align-items: center;
       opacity: 0;
       transition: opacity 0.3s ease;
-      border-radius: 5px;
+      border-radius: 0rem;
       font-size: medium;
 
       &:hover, &.dead {
@@ -114,7 +115,6 @@ input[type="text"], button {
   }
 }
 
-/* Modal styles */
 .modal {
   position: fixed;
   top: 0;
@@ -132,4 +132,9 @@ input[type="text"], button {
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.player-title {
+  font-family: 'RubikScribble', sans-serif;
+  font-size: 4rem;
 }

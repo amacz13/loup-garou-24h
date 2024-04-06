@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+@font-face {
+  font-family: 'Bungee Spice';
+  src: url('assets/fonts/BungeeSpice-Regular.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'RubikScribble';
+  src: url('assets/fonts/RubikScribble-Regular.ttf');
+}
+
+body {
+  margin: 0;
+}
