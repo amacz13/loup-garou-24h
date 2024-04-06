@@ -1,4 +1,4 @@
-export enum gameStep {
+export enum GameStep {
   voyante,
   jour,
   loups
