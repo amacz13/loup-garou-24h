@@ -100,6 +100,7 @@ input[type="text"], button {
       opacity: 0;
       transition: opacity 0.3s ease;
       border-radius: 5px;
+      font-size: medium;
 
       &:hover, &.dead {
         opacity: 1;
