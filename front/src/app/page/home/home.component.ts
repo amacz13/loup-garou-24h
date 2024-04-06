@@ -7,7 +7,6 @@ import { Power, Role } from '../../entity/player.model';
 import { initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 import { GameStep } from '../../utils/game-steps.utils';
-import { log } from 'console';
 
 export interface Player {
   name: string;
@@ -29,12 +28,14 @@ export class HomeComponent implements OnInit {
   newMessage: string = '';
   players: Player[] = [];
   gameStatus: gameStatus = gameStatus.running;
-  playerRole: Role = Role.Villager;
+  playerPower: Power = Power.Simple;
   GameStatusEnum = gameStatus;
   vote = vote;
+  Power = Power;
   designedVictim = undefined;
   instruction: string = "Qui voulez-vous dévorer ?";
-  gameStep: GameStep = GameStep.loups;
+  gameStep: GameStep = GameStep.jour;
+  shouldChoosePower: boolean = true;
 
   constructor(private apiService: ApiService) {
 
@@ -98,7 +99,7 @@ export class HomeComponent implements OnInit {
     }
   };
 
-  wolfVote(player: Player){
+  wolfVote(player?: Player){
 
     const subscribtionCall2 = (response: EventResponse) => {
 
@@ -113,9 +114,21 @@ export class HomeComponent implements OnInit {
     }
 
     if(this.gameStatus === gameStatus.running){
-      this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
+      if(player){
+        this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
+      }
       const filteredPlayers = this.players.filter(player => !player.isDead)
-      this.apiService.getNight(filteredPlayers, player.name).subscribe(subscribtionCall2);
+      this.apiService.getNight(filteredPlayers, player?.name).subscribe(subscribtionCall2);
+    }
+  }
+
+  goToNight(){
+    if(this.playerPower === Power.Loup){
+      this.instruction = "Qui voulez-vous dévorer ?";
+      this.gameStep = GameStep.loups;
+    }
+    else{
+      this.wolfVote();
     }
   }
 
@@ -135,8 +148,7 @@ export class HomeComponent implements OnInit {
         break;*/
         case GameStep.jour:
           this.villagerVote(player);
-          this.instruction = "Qui voulez-vous dévorer ?";
-          this.gameStep = GameStep.loups;
+          this.goToNight();
           break;
         case GameStep.loups:
           this.wolfVote(player);
@@ -144,5 +156,11 @@ export class HomeComponent implements OnInit {
           this.gameStep = GameStep.jour;
           break;
     }
+  }
+
+  choosePower(power: Power){
+    this.playerPower = power;
+    this.shouldChoosePower = false;
+    this.instruction = power === Power.Loup ? "Qui voulez-vous dévorer ?" : "Votez pour tuer un loup :";
   }
 }

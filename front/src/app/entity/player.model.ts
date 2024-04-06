@@ -1,6 +1,6 @@
 export enum Role {
-  Villager,
-  Werewolf
+  Villager = "Villageois",
+  Werewolf = "Loup-garou"
 }
 
 export enum Power {

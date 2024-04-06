@@ -23,7 +23,7 @@ export class ApiService {
   private day: string = 'jour';
   constructor(private httpClient: HttpClient) {}
 
-  getNight(players: Player[], target: string): Observable<EventResponse> {
+  getNight(players: Player[], target?: string): Observable<EventResponse> {
     return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target});
   }
 

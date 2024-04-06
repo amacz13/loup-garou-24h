@@ -30,6 +30,13 @@
       <button (click)="initializeGame()">Rejouer</button>
     </div>
   </div>
+  <div *ngIf="shouldChoosePower === true" class="modal">
+    <div class="modal-content">
+      <h2>Choisissez votre rôle !</h2>
+      <button (click)="choosePower(Power.Loup)">Loup-garou</button>
+      <button (click)="choosePower(Power.Simple)">Simple villageois</button>
+    </div>
+  </div>
 </main>
 <footer>
   <p>&copy; 2024 Werewolf Game</p>
