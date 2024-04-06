@@ -131,4 +131,4 @@ dist
 
 models
 .idea/*
-back/**/*.js
+*.js
