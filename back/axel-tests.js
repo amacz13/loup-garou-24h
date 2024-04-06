@@ -8,26 +8,8 @@ const llama = await getLlama();
 llama.logLevel = 'disabled';
 const model = await llama.loadModel({
     modelPath: path.join(__dirname, "models", "openchat_3.5.Q5_K_M.gguf"),
-    temperature: 0.8,
+    temperature: 0.1,
 });
-const context = await model.createContext();
-const session = new LlamaChatSession({contextSequence: context.getSequence()});
-
-const initPrompt = "GPT4 User: Les joueurs sont divisés en deux camps : les villageois (certains d'entre eux jouant un rôle spécial) et les loups-garous. Le but des villageois est de découvrir et d'éliminer les loups-garous, et le but des loups-garous est de ne pas se faire démasquer et d'éliminer tous les villageois.\n" +
-    "\n" +
-    "Les tours de jeu sont rythmés par une période de jour et une période de nuit.\n" +
-    "\n" +
-    "Durant la nuit, tous les joueurs ont les yeux fermés et ne doivent pas communiquer. Appelés par le meneur de jeu, les loups-garous se réveillent, et désignent ensemble un villageois qui sera leur victime.\n" +
-    "\n" +
-    "Le jour revenu, tout le monde se réveille et ouvre les yeux et le meneur de jeu révèle l'identité de la victime. Les victimes n'interviennent plus jusqu'à la fin du jeu mais pourront garder les yeux ouverts et y assister. Les villageois vont tenter de découvrir qui sont les loups-garous par déductions, discours, révélations… Les loups-garous (qui participent également aux débats en tant que villageois) doivent éviter de se faire incriminer en détournant les soupçons sur d'autres personnes. Il y a donc un temps de discussion au cours duquel chacun tente de découvrir la véritable identité de chaque joueur.\n" +
-    "\n" +
-    "À la fin du débat, chaque joueur pointe du doigt une personne qu'il suspecte d'être loup-garou. Celui étant désigné par la majorité est \"exécuté\" et le meneur montre son identité. Il est donc éliminé, puis le jeu recommence à la tombée de la nuit.<|end_of_turn|>GPT4 Assistant:";
-
-const initRes = await session.prompt(initPrompt);
-console.log(initRes);
-
-const compressed = await session.prompt("GPT4 User: Résume moi les règles.<|end_of_turn|>GPT4 Assistant:");
-console.log(compressed);
 
 const players = [
     {
@@ -51,14 +33,30 @@ const players = [
         role: "Villageois",
         personality: "Idiot, Drôle",
     }
-]
+];
+
+/*console.log("C'est la nuit 🌙");
+const loups = players.filter(player => player.role === "Loup Garou");
+const villageois = players.filter(player => player.role === "Villageois");
+console.log(`Les loups garous (${loups.map(l => l.name).join(',')}) se réveillent`);
+
+for (const loup of loups) {
+    const otherPlayers = players.filter(p => p.name !== loup.name).map(p => p.name);
+    const plContext = await model.createContext();
+    const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+    const playerPrompt = `GPT4 User: ${initPrompt}. Ton nom est ${loup.name}, tu es un ${loup.role} et ta personnalité est ${loup.personality}. Les villageois sont ${villageois.map(v => v.name + ' qui est ' + v.personality).join(", ")}. Les autres loups-garous sont ${loups.filter(p => p.name !== loup.name).map(p => p.name).join(",")}. En tant que loup garou, quel villageois souhaites-tu éliminer ? ?<|end_of_turn|>GPT4 Assistant:`;
+    console.log(` -> ${playerPrompt}`);
+    const playerRes = await plSession.prompt(playerPrompt);
+    console.log(` <- ${playerRes}`);
+}*/
+
 
 for (const player of players) {
     console.log(`Jeu en tant que ${player.name}`);
     const plContext = await model.createContext();
     const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
     const otherPlayers = players.filter(p => p.name !== player.name).map(p => p.name);
-    const playerPrompt = `GPT4 User: Voici les règles du jeu : ${compressed}. Tu incarnes ${player.name}, tu es un ${player.role} et ta personnalité est ${player.personality}. Les autres joueurs sont ${otherPlayers.join(", ")}. ${ player.role === 'Loup Garou' ? `Les autres loups-garous sont ${players.filter(p => p.role === 'Loup Garou' && p.name !== player.name).map(p => p.name).join(",")}. ` : ''}Contre qui votes-tu ?<|end_of_turn|>GPT4 Assistant:`;
+    const playerPrompt = `GPT4 User: Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${otherPlayers.join(", ")}. ${ player.role === 'Loup Garou' ? `Les autres loups-garous sont ${players.filter(p => p.role === 'Loup Garou' && p.name !== player.name).map(p => p.name).join(",")}. ` : 'Tu dois voter pour tuer le joueur que tu suspectes être un loup garou'}C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après. <|end_of_turn|>GPT4 Assistant:`;
     console.log(` -> ${playerPrompt}`);
     const playerRes = await plSession.prompt(playerPrompt);
     console.log(` <- ${playerRes}`);
