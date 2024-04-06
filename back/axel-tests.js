@@ -48,6 +48,8 @@ for (const loup of loups) {
     console.log(` <- ${playerRes}`);
 }*/
 
+function doDayVote(playerList) {}
+
 const votes = [];
 
 for (const player of players) {
