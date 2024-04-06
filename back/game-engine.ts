@@ -1,6 +1,6 @@
 import {fileURLToPath} from "url";
 import path from "path";
-import {getLlama, LlamaChatSession, LlamaLogLevel} from "node-llama-cpp";
+import {getLlama, Llama, LlamaChatSession, LlamaLogLevel} from "node-llama-cpp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startPrompt = '<|system|>\n' +
@@ -13,6 +13,7 @@ export interface Player {
     name: string;
     role: string;
     personality: string;
+    isReal?: boolean;
 }
 
 export interface Result {
@@ -28,19 +29,24 @@ export interface PlayerReason {
 /**
  * doDayVote: Do a day round where all players vote to eliminate one of them
  * @param playerList The list of all remaining players
+ * @param playerVote Optional, the vote of the real player
  */
-export async function doDayVote(playerList: Player[]): Promise<Result> {
+export async function doDayVote(playerList: Player[], playerVote?: string): Promise<Result> {
     playerList = randomizePlayerArray(playerList);
     console.log("☀️ Le jour se lève !")
     const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
     const votesAsSet = new Set<string>();
+    if (playerVote) {
+        votes.push(playerVote);
+        votesAsSet.add(playerVote);
+    }
     const result: Result = {
         selectedPlayerNameList: [],
         reasons: [],
     };
 
-    for (const player of playerList) {
+    for (const player of playerList.filter(p => !p.isReal)) {
         console.log(`-> C'est à ${player.name} de voter !`);
         let target = 'None';
         let reason = '';
@@ -51,11 +57,11 @@ export async function doDayVote(playerList: Player[]): Promise<Result> {
             const plContext = await model.createContext({batchSize: 0});
             const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
             const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
-            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
+            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
             //console.log(" <- ",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
-            target =  jsonRes.who.toLowerCase();
-            reason =  jsonRes.why;
+            target = jsonRes.who.toLowerCase();
+            reason = await funify(jsonRes.why, llama);
             votesAsSet.add(target);
             await plContext.dispose();
             await model.dispose()
@@ -99,12 +105,14 @@ export async function doDayVote(playerList: Player[]): Promise<Result> {
 /**
  * doNightVote: Do a night round where wolves vote to eliminate a villager
  * @param playerList The list of all remaining players
+ * @param playerVote Optional, the vote of the real player
  */
-export async function doNightVote(playerList: Player[]): Promise<Result> {
+export async function doNightVote(playerList: Player[], playerVote?: string): Promise<Result> {
     playerList = randomizePlayerArray(playerList);
     console.log("🌙️ La nuit arrive !")
     const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
+    if (playerVote) votes.push(playerVote);
     const result: Result = {
         selectedPlayerNameList: [],
         reasons: [],
@@ -112,7 +120,7 @@ export async function doNightVote(playerList: Player[]): Promise<Result> {
     const wolves = playerList.filter(p => p.role === 'Loup Garou');
     const villagers = playerList.filter(p => p.role !== 'Loup Garou');
 
-    for (const wolf of wolves) {
+    for (const wolf of wolves.filter(p => !p.isReal)) {
         console.log(`-> C'est à ${wolf.name} de choisir qui sera mangé ce soir !`);
         let target = 'None';
         let reason = '';
@@ -123,11 +131,11 @@ export async function doNightVote(playerList: Player[]): Promise<Result> {
             const plContext = await model.createContext({batchSize: 0});
             const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
             const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. ${votes.length > 0 ? 'Tes partenaires ont voté pour '+ votes.join(',') +'. ' : ''} Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
-            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
+            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
             //console.log(" <- ",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
             target = jsonRes.who.toLowerCase();
-            reason = jsonRes.why;
+            reason = await funify(jsonRes.why, llama);
             console.log(" <- ",reason)
         } catch (e) {
             console.error("Une erreur est survenue : ",e);
@@ -173,4 +181,14 @@ function randomizePlayerArray(array: any[]) {
     return array.map(value => ({ value, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value)
+}
+
+async function funify(sentence: string, llama: Llama): Promise<string> {
+    const model = await llama.loadModel({
+        modelPath: path.join(__dirname, "models", "zephyr-7b-beta.Q4_K_M.gguf")
+    });
+    const plContext = await model.createContext({batchSize: 0});
+    const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+    const playerPrompt = `Reformule, de façon amusante, en français sans rien ajouter avant ou après, la phrase suivante : ${sentence}`;
+    return (await plSession.prompt(playerPrompt, {temperature: 0.15})).replace("<|assistant|>","").replace("<|user|>","");
 }
