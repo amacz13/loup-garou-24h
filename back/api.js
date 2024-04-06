@@ -14,7 +14,7 @@ function getRandomPlayer(players) {
 
 // Définir une route pour la page d'accueil
 app.get('/', (req, res) => {
-  res.send('Hello World Tester c\'est douter!');
+    res.send('Hello World Tester c\'est douter!');
 });
 
 // Définir une route pour renvoyer le numéro d'étape correspondant
@@ -27,17 +27,17 @@ app.post('/jour', (req, res) => {
     const players = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
     console.log(players);
     const randomPlayer = getRandomPlayer(players); // Obtenir un joueur aléatoire
-    res.json({ name: randomPlayer.name, message: 'Le village a désigné'});
+    res.json({ name: randomPlayer.name, message: 'Le village a désigné' });
 });
 
 app.post('/nuit', (req, res) => {
     const players = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
     console.log(players);
     const randomPlayer = getRandomPlayer(players); // Obtenir un joueur aléatoire
-    res.json({ name: randomPlayer.name, message: 'Les loups-garous ont décidés d\'éliminer'});
+    res.json({ name: randomPlayer.name, message: 'Les loups-garous ont décidés d\'éliminer' });
 });
 
 // Démarrer le serveur sur le port 3000
 app.listen(3000, () => {
-  console.log('Le serveur écoute sur le port 3000');
+    console.log('Le serveur écoute sur le port 3000');
 });
