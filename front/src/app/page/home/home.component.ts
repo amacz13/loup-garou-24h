@@ -2,6 +2,8 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+import { AppComponent } from '../../app.component';
+import { HeaderComponent } from '../../components/header/header.component';
 
 interface Player {
   name: string;
@@ -15,7 +17,7 @@ interface Player {
   selector: 'home-root',
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss'],
-  imports:[FormsModule, NgFor, NgIf]
+  imports:[FormsModule, NgFor, NgIf, HeaderComponent]
 })
 export class HomeComponent implements OnInit {
   messages: string[] = [];
