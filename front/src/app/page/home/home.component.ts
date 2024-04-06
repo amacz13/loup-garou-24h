@@ -1,7 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../services/api.service';
+import { ApiService, EventResponse } from '../../services/api.service';
 import { HeaderComponent } from '../../components/header/header.component';
 import { Power, Role } from '../../entity/player.model';
 import { initializePlayers } from '../../utils/initialize-players.utils';
@@ -33,8 +33,8 @@ export class HomeComponent implements OnInit {
   GameStatusEnum = gameStatus;
   vote = vote;
   designedVictim = undefined;
-  instruction: string = "Quelle carte voulez-vous voir ?";
-  gameStep: GameStep = GameStep.voyante;
+  instruction: string = "Qui voulez-vous dévorer ?";
+  gameStep: GameStep = GameStep.loups;
 
   constructor(private apiService: ApiService) {
 
@@ -72,10 +72,17 @@ export class HomeComponent implements OnInit {
 
   villagerVote(player: Player) {
 
-    const subscribtionCall2 = (response: any) => {
+    const subscribtionCall2 = (response: EventResponse) => {
 
       const myPlayer = this.players.find(p => p.name === response.name);
       this.messages.push(`MJ: ${response.message} ${response.name}`);
+
+      response.reasons.forEach(reason => {
+        if(reason.reason !== "" && reason.playerName !== ""){
+          this.messages.push(`${reason.playerName} : ${reason.reason}`);
+        }
+      })
+
       if(myPlayer){
         myPlayer.isDead = true;
         const filteredPlayers = this.players.filter(player => !player.isDead)
@@ -84,19 +91,20 @@ export class HomeComponent implements OnInit {
     }
 
     if(this.gameStatus === gameStatus.running){
-      this.messages.push(`MJ: vous avez voté contre ${player.name}`);
+      this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
       const filteredPlayers = this.players.filter(player => !player.isDead)
 
-      this.apiService.getDay(filteredPlayers).subscribe(subscribtionCall2);
+      this.apiService.getDay(filteredPlayers, player.name).subscribe(subscribtionCall2);
     }
   };
 
-  wolfVote(){
+  wolfVote(player: Player){
 
-    const subscribtionCall2 = (response: any) => {
+    const subscribtionCall2 = (response: EventResponse) => {
 
       const myPlayer = this.players.find(p => p.name === response.name);
       this.messages.push(`MJ: ${response.message} ${response.name}`);
+
       if(myPlayer){
         myPlayer.isDead = true;
         const filteredPlayers = this.players.filter(player => !player.isDead)
@@ -105,24 +113,36 @@ export class HomeComponent implements OnInit {
     }
 
     if(this.gameStatus === gameStatus.running){
+      this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
       const filteredPlayers = this.players.filter(player => !player.isDead)
-      this.apiService.getNight(filteredPlayers).subscribe(subscribtionCall2);
+      this.apiService.getNight(filteredPlayers, player.name).subscribe(subscribtionCall2);
     }
   }
 
   selectPlayer(player: Player){
     switch(this.gameStep){
-      case GameStep.jour:
+      //à décommenter si on implémente la voyante
+      /*case GameStep.jour:
         this.villagerVote(player);
-        this.instruction = "Quelle carte voulez-vous voir ?"
+        this.instruction = "Quelle carte voulez-vous voir ?";
         this.gameStep = GameStep.voyante;
         break;
       case GameStep.voyante:
         this.messages.push(`MJ: Vous avez utilisé votre pouvoir de voyante : ${player.name} est ${player.power}`);
-        this.wolfVote();
+        this.wolfVote(player);
         this.instruction = "Votez pour tuer un loup :"
         this.gameStep = GameStep.jour;
-        break;
+        break;*/
+        case GameStep.jour:
+          this.villagerVote(player);
+          this.instruction = "Qui voulez-vous dévorer ?";
+          this.gameStep = GameStep.loups;
+          break;
+        case GameStep.loups:
+          this.wolfVote(player);
+          this.instruction = "Votez pour tuer un loup :";
+          this.gameStep = GameStep.jour;
+          break;
     }
   }
 }

@@ -3,9 +3,15 @@ import { HttpClient } from "@angular/common/http";
 import { Player } from "../entity/player.model";
 import { Observable } from 'rxjs';
 
-interface EventResponse {
+interface PlayerReason {
+  playerName: string;
+  reason: string;
+}
+
+export interface EventResponse {
   name: string;
   message: string;
+  reasons: Array<PlayerReason>
 }
 @Injectable({
   providedIn: 'root'
@@ -17,12 +23,11 @@ export class ApiService {
   private day: string = 'jour';
   constructor(private httpClient: HttpClient) {}
 
-  getNight(players: Player[]): Observable<EventResponse> {
-    return this.httpClient.post<EventResponse>(this.url + this.night, {players: players});
+  getNight(players: Player[], target: string): Observable<EventResponse> {
+    return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target});
   }
 
-  getDay(players: Player[]): Observable<EventResponse> {
-    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players});
+  getDay(players: Player[], target: string): Observable<EventResponse> {
+    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target});
   }
-
 }
