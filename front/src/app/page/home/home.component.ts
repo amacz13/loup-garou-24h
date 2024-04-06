@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
   vote = vote;
   Power = Power;
   designedVictim = undefined;
-  instruction: string = "Qui voulez-vous dévorer ?";
+  instruction: string = "Qui voulez-vous dévorer ?";
   gameStep: GameStep = GameStep.jour;
   shouldChoosePower: boolean = true;
 
@@ -152,7 +152,7 @@ export class HomeComponent implements OnInit {
           break;
         case GameStep.loups:
           this.wolfVote(player);
-          this.instruction = "Votez pour tuer un loup :";
+          this.instruction = "Votez pour tuer un loup :";
           this.gameStep = GameStep.jour;
           break;
     }

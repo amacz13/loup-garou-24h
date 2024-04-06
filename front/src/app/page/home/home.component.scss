@@ -136,5 +136,16 @@ input[type="text"], button {
 
 .player-title {
   font-family: 'RubikScribble', sans-serif;
-  font-size: 4rem;
+  font-size: 2rem;
+}
+
+.player-data {
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: space-between;
+  margin: 1rem 0 ;
+}
+
+.player-role-label {
+  font-weight: bold;
 }
