@@ -1,16 +1,17 @@
 import {fileURLToPath} from "url";
 import path from "path";
-import {LlamaModel, LlamaContext, LlamaChatSession} from "node-llama-cpp";
-import PromptSync from "prompt-sync";
+import {LlamaModel, LlamaContext, LlamaChatSession, getLlama} from "node-llama-cpp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const model = new LlamaModel({
+const llama = await getLlama();
+llama.logLevel = 'disabled';
+const model = await llama.loadModel({
     modelPath: path.join(__dirname, "models", "openchat_3.5.Q5_K_M.gguf"),
     temperature: 0.8,
 });
-const context = new LlamaContext({model});
-const session = new LlamaChatSession({context});
+const context = await model.createContext();
+const session = new LlamaChatSession({contextSequence: context.getSequence()});
 
 const initPrompt = "GPT4 User: Les joueurs sont divisés en deux camps : les villageois (certains d'entre eux jouant un rôle spécial) et les loups-garous. Le but des villageois est de découvrir et d'éliminer les loups-garous, et le but des loups-garous est de ne pas se faire démasquer et d'éliminer tous les villageois.\n" +
     "\n" +
@@ -25,15 +26,42 @@ const initPrompt = "GPT4 User: Les joueurs sont divisés en deux camps : les vil
 const initRes = await session.prompt(initPrompt);
 console.log(initRes);
 
-const playerPrompt = 'GPT4 User: Paul est Villageois. Pierre est Villageois. Jacques est Loup Garou. Léa est Loup Garou. Marie est Villageois<|end_of_turn|>GPT4 Assistant:';
-const playerRes = await session.prompt(playerPrompt);
-console.log(playerRes);
+const compressed = await session.prompt("GPT4 User: Résume moi les règles.<|end_of_turn|>GPT4 Assistant:");
+console.log(compressed);
 
-let userSentence = '';
-do {
-    userSentence = PromptSync()(`Saisir votre question : `);
-    if (userSentence !== 'Bye') {
-        const a1 = await session.prompt(userSentence);
-        console.log(a1);
+const players = [
+    {
+        name: "Pierre",
+        role: "Loup Garou",
+        personality: "Courageux, Audacieux",
+    },{
+        name: "Marie",
+        role: "Loup Garou",
+        personality: "Timide, Prudente",
+    },{
+        name: "Léa",
+        role: "Villageois",
+        personality: "Brave, Expressive",
+    },{
+        name: "Martine",
+        role: "Villageois",
+        personality: "Maline, Stratège",
+    },{
+        name: "Paul",
+        role: "Villageois",
+        personality: "Idiot, Drôle",
     }
-} while (userSentence !== 'Bye');
+]
+
+for (const player of players) {
+    console.log(`Jeu en tant que ${player.name}`);
+    const plContext = await model.createContext();
+    const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+    const otherPlayers = players.filter(p => p.name !== player.name).map(p => p.name);
+    const playerPrompt = `GPT4 User: Voici les règles du jeu : ${compressed}. Tu incarnes ${player.name}, tu es un ${player.role} et ta personnalité est ${player.personality}. Les autres joueurs sont ${otherPlayers.join(", ")}. ${ player.role === 'Loup Garou' ? `Les autres loups-garous sont ${players.filter(p => p.role === 'Loup Garou' && p.name !== player.name).map(p => p.name).join(",")}. ` : ''}Contre qui votes-tu ?<|end_of_turn|>GPT4 Assistant:`;
+    console.log(` -> ${playerPrompt}`);
+    const playerRes = await plSession.prompt(playerPrompt);
+    console.log(` <- ${playerRes}`);
+}
+
+process.exit();
