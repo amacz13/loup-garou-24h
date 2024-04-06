@@ -61,7 +61,7 @@ export async function doDayVote(playerList: Player[], playerVote?: string): Prom
             //console.log(" <- ",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
             target = jsonRes.who.toLowerCase();
-            reason = await funify(jsonRes.why, llama);
+            reason = jsonRes.why;
             votesAsSet.add(target);
             await plContext.dispose();
             await model.dispose()
@@ -135,8 +135,8 @@ export async function doNightVote(playerList: Player[], playerVote?: string): Pr
             //console.log(" <- ",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
             target = jsonRes.who.toLowerCase();
-            reason = await funify(jsonRes.why, llama);
-            console.log(" <- ",reason)
+            //reason = await funify(jsonRes.why, llama);
+            //console.log(" <- ",reason)
         } catch (e) {
             console.error("Une erreur est survenue : ",e);
         }
