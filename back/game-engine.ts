@@ -51,10 +51,10 @@ export async function doDayVote(playerList: Player[]): Promise<Result> {
             const plContext = await model.createContext({batchSize: 0});
             const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
             const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
-            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.4});
-            //console.log("playerRes",playerRes)
+            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
+            //console.log(" <- ",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
-            target =  jsonRes.who;
+            target =  jsonRes.who.toLowerCase();
             reason =  jsonRes.why;
             votesAsSet.add(target);
             await plContext.dispose();
@@ -113,6 +113,7 @@ export async function doNightVote(playerList: Player[]): Promise<Result> {
     const villagers = playerList.filter(p => p.role !== 'Loup Garou');
 
     for (const wolf of wolves) {
+        console.log(`-> C'est à ${wolf.name} de choisir qui sera mangé ce soir !`);
         let target = 'None';
         let reason = '';
         try {
@@ -123,15 +124,16 @@ export async function doNightVote(playerList: Player[]): Promise<Result> {
             const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
             const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. ${votes.length > 0 ? 'Tes partenaires ont voté pour '+ votes.join(',') +'. ' : ''} Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
             const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
-            //console.log("playerRes",playerRes)
+            //console.log(" <- ",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
-            target = jsonRes.who;
+            target = jsonRes.who.toLowerCase();
             reason = jsonRes.why;
+            console.log(" <- ",reason)
         } catch (e) {
             console.error("Une erreur est survenue : ",e);
         }
         votes.push(target);
-        console.log(` <- Je souhaite dévorer ${target}`);
+        console.log(` <- Je souhaite donc dévorer ${target}`);
     }
 
     const voteMap = new Map();
