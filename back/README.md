@@ -13,6 +13,6 @@ node index.js
 
 1. Exécuter la commande suivante :
 ```
-npm run serveur
+npm run server
 ```
 2. L'API est accessible sur le port 3000
