@@ -7,7 +7,7 @@ import { Player } from "../entity/player.model";
 })
 export class ApiService {
 
-  private url: string = 'http://localhost:3000/';
+  private url: string = '/api/';
   private night: string = 'jour';
   private day: string = 'nuit';
   constructor(private httpClient: HttpClient) {}

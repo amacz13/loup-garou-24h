@@ -1,6 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../services/api.service';
 
 interface Player {
   name: string;
@@ -16,13 +17,17 @@ interface Player {
   styleUrls: ['./home.component.scss'],
   imports:[FormsModule, NgFor, NgIf]
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   messages: string[] = [];
   newMessage: string = '';
   players: Player[] = [];
   gameStatus: "running" | "villagersWon" | "werewolfesWon" = "running";
 
-  constructor() {
+  constructor(private apiService: ApiService) {
+
+  }
+
+  ngOnInit(): void {
     this.initializeGame();
   }
 
@@ -129,6 +134,9 @@ export class HomeComponent {
   }
 
   startGame(): void {
-    this.getAnswerRecursively();
+    //this.getAnswerRecursively();
+    this.apiService.getDay(this.players).subscribe((res) => {
+      console.log(res);
+    });
   }
 }
