@@ -15,26 +15,50 @@ export interface Player {
     personality: string;
 }
 
-export async function doDayVote(playerList: Player[]): Promise<Player[]> {
+export interface Result {
+    selectedPlayerNameList: string[];
+    reasons: PlayerReason[]
+}
+
+export interface PlayerReason {
+    playerName: string;
+    reason: string;
+}
+
+export async function doDayVote(playerList: Player[]): Promise<Result> {
+    playerList = randomizePlayerArray(playerList);
     console.log("☀️ Le jour se lève !")
     const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
+    const result: Result = {
+        selectedPlayerNameList: [],
+        reasons: [],
+    };
 
     for (const player of playerList) {
         console.log(`-> C'est à ${player.name} de voter !`);
-        const model = await llama.loadModel({
-            modelPath: path.join(__dirname, "models", "zephyr-7b-beta.Q4_K_M.gguf")
-        });
-        const plContext = await model.createContext({batchSize: 0});
-        const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
-        const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
-        const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.4});
-        console.log("playerRes",playerRes)
-        const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
-        votes.push(jsonRes.who);
-        console.log(` <- Je vote contre ${jsonRes.who}, car ${jsonRes.why}`);
-        await plContext.dispose();
-        await model.dispose()
+        let target = 'None';
+        let reason = '';
+        try {
+            const model = await llama.loadModel({
+                modelPath: path.join(__dirname, "models", "zephyr-7b-beta.Q4_K_M.gguf")
+            });
+            const plContext = await model.createContext({batchSize: 0});
+            const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+            const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
+            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.4});
+            //console.log("playerRes",playerRes)
+            const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
+            target =  jsonRes.who;
+            reason =  jsonRes.reason;
+            await plContext.dispose();
+            await model.dispose()
+        } catch (e) {
+            console.error("Une erreur est survenue : ",e);
+        }
+        votes.push(target);
+        result.reasons.push({playerName: player.name, reason});
+        console.log(` <- Je vote contre ${target}, car ${reason}`);
     }
 
     const voteMap = new Map();
@@ -60,29 +84,45 @@ export async function doDayVote(playerList: Player[]): Promise<Player[]> {
     } else {
         console.log(`${invertedVoteMap.get(maxVote)[0]} est éliminé !`)
     }
-    return invertedVoteMap.get(maxVote);
+    return {
+        ...result,
+        selectedPlayerNameList: invertedVoteMap.get(maxVote),
+    };
 }
 
 
-export async function doNightVote(playerList: Player[]): Promise<Player[]> {
+export async function doNightVote(playerList: Player[]): Promise<Result> {
+    playerList = randomizePlayerArray(playerList);
     console.log("🌙️ La nuit arrive !")
     const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
+    const result: Result = {
+        selectedPlayerNameList: [],
+        reasons: [],
+    };
     const wolves = playerList.filter(p => p.role === 'Loup Garou');
     const villagers = playerList.filter(p => p.role !== 'Loup Garou');
 
     for (const wolf of wolves) {
-        const model = await llama.loadModel({
-            modelPath: path.join(__dirname, "models", "zephyr-7b-beta.Q4_K_M.gguf")
-        });
-        const plContext = await model.createContext({batchSize: 0});
-        const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
-        const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
-        const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
-        console.log("playerRes",playerRes)
-        const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
-        votes.push(jsonRes.who);
-        console.log(` <- Je souhaite dévorer ${jsonRes.who}`);
+        let target = 'None';
+        let reason = '';
+        try {
+            const model = await llama.loadModel({
+                modelPath: path.join(__dirname, "models", "zephyr-7b-beta.Q4_K_M.gguf")
+            });
+            const plContext = await model.createContext({batchSize: 0});
+            const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+            const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
+            const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
+            //console.log("playerRes",playerRes)
+            const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
+            target = jsonRes.who;
+            reason = jsonRes.why;
+        } catch (e) {
+            console.error("Une erreur est survenue : ",e);
+        }
+        votes.push(target);
+        console.log(` <- Je souhaite dévorer ${target}`);
     }
 
     const voteMap = new Map();
@@ -108,34 +148,14 @@ export async function doNightVote(playerList: Player[]): Promise<Player[]> {
     } else {
         console.log(`${invertedVoteMap.get(maxVote)[0]} est dévoré par les loups !`)
     }
-    return invertedVoteMap.get(maxVote);
+    return {
+        ...result,
+        selectedPlayerNameList: invertedVoteMap.get(maxVote),
+    };
 }
 
-const playersTest: Player[] = [
-    {
-        name: "Léa",
-        role: 'Villageois',
-        personality: "Brave, Expressive",
-    },{
-        name: "Pierre",
-        role: 'Loup Garou',
-        personality: "Courageux, Audacieux",
-    },{
-        name: "Marie",
-        role: 'Loup Garou',
-        personality: "Timide, Prudente",
-    },{
-        name: "Martine",
-        role: 'Villageois',
-        personality: "Maline, Stratège",
-    },{
-        name: "Paul",
-        role: 'Villageois',
-        personality: "Idiot, Drôle",
-    }
-].map(value => ({ value, sort: Math.random() }))
-    .sort((a, b) => a.sort - b.sort)
-    .map(({ value }) => value);
-
-//doDayVote(playersTest);
-//doNightVote(playersTest);
+function randomizePlayerArray(array: any[]) {
+    return array.map(value => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value)
+}

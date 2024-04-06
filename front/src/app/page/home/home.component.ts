@@ -6,6 +6,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { Power, Role } from '../../entity/player.model';
 import { initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
+import { gameStep } from '../../utils/game-steps.utils';
 
 export interface Player {
   name: string;
@@ -27,10 +28,13 @@ export class HomeComponent implements OnInit {
   newMessage: string = '';
   players: Player[] = [];
   gameStatus: gameStatus = gameStatus.running;
-  isDay: boolean = false;
+  //isDay: boolean = false;
   playerRole: Role = Role.Villager;
   GameStatusEnum = gameStatus;
   vote = vote;
+  designedVictim = undefined;
+  instruction: string = "Players";
+  gameStep: gameStep = gameStep.jour;
 
   constructor(private apiService: ApiService) {
 
@@ -52,38 +56,38 @@ export class HomeComponent implements OnInit {
     this.newMessage= '';
     this.players = [];
     this.gameStatus = gameStatus.running;
-    this.isDay = false;
+    //this.isDay = false;
     initializePlayers(this.players);
-    this.startGame();
   }
 
-  playGame() {
-
-    const filteredPlayers = this.players.filter(player => !player.isDead)
+  playGame(player: Player) {
 
     const subscribtionCall = (nightResponse: any) => {
       const myPlayer = this.players.find(p => p.name === nightResponse.name);
-      this.messages.push(`MJ: ${nightResponse.message}`);
+      this.messages.push(`MJ: ${nightResponse.message} ${nightResponse.name}`);
       if(myPlayer){
         myPlayer.isDead = true;
-
-        this.gameStatus = checkIfGameIsOver(this.players);
-      }
-
-      if(this.gameStatus === gameStatus.running){
-        this.isDay = !this.isDay;
-        this.playGame();
+        const filteredPlayers = this.players.filter(player => !player.isDead)
+        this.gameStatus = checkIfGameIsOver(filteredPlayers);
       }
     }
 
-    this.isDay ?
-      this.apiService.getDay(filteredPlayers).subscribe(subscribtionCall)
-     : this.apiService.getNight(filteredPlayers).subscribe(subscribtionCall);
+    if(this.gameStatus === gameStatus.running){
+      //console.log("appelle getDay avec la victime "+ player.name);
+      this.messages.push(`MJ: vous avez voté contre ${player.name}`);
+      const filteredPlayers = this.players.filter(player => !player.isDead)
+      this.apiService.getDay(filteredPlayers).subscribe(subscribtionCall);
+    }
 
+
+    if(this.gameStatus === gameStatus.running){
+      const filteredPlayers = this.players.filter(player => !player.isDead)
+      this.apiService.getNight(filteredPlayers).subscribe(subscribtionCall);
+    }
   };
 
-  startGame(): void {
-    this.playGame();
+  startGame(player: Player): void {
+    this.playGame(player);
   }
 
 }

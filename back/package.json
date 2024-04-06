@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "run": "node index.js",
-    "debug": "npx tsc && npx ts-node game-engine",
     "server": "npx tsc && npx ts-node api",
     "server-mock": "npx tsc && npx ts-node api-mock",
+    "debug": "npx tsc && npx ts-node debug",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
