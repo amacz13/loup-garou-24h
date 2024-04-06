@@ -6,7 +6,7 @@
       <div class="player-grid">
         <button class="player" *ngFor="let player of players" (click)="vote(player)">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
-          <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? 'Mort' : 'Tuer' }}</div>
+          <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Tuer' }}</div>
           <p>{{ player.name }}</p>
         </button>
       </div>
