@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "run": "node index.js",
-    "debug": "npx ts-node game-engine",
+    "debug": "npx tsc && npx ts-node game-engine",
     "server": "nodemon --experimental-modules api.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
