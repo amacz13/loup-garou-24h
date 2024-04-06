@@ -161,7 +161,7 @@ export class HomeComponent implements OnInit {
           break;
         case GameStep.loups:
           this.wolfVote(player);
-          this.instruction = "Votez pour tuer un loup :";
+          this.instruction = "Votez pour tuer un loup :";
           this.gameStep = GameStep.jour;
           break;
     }
