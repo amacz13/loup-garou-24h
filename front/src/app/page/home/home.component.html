@@ -2,7 +2,7 @@
 <main>
   <div class="container">
     <section class="players">
-      <h2>{{instruction}}</h2>
+      <h2 class="player-title">{{instruction}}</h2>
       <div class="player-grid">
         <button class="player" *ngFor="let player of players" (click)="selectPlayer(player)">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
@@ -11,7 +11,6 @@
         </button>
       </div>
     </section>
-
 
     <section class="conversation">
       <div class="messages">
