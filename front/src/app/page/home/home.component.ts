@@ -6,7 +6,8 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { Power, Role } from '../../entity/player.model';
 import { initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
-import { gameStep } from '../../utils/game-steps.utils';
+import { GameStep } from '../../utils/game-steps.utils';
+import { log } from 'console';
 
 export interface Player {
   name: string;
@@ -28,13 +29,12 @@ export class HomeComponent implements OnInit {
   newMessage: string = '';
   players: Player[] = [];
   gameStatus: gameStatus = gameStatus.running;
-  //isDay: boolean = false;
   playerRole: Role = Role.Villager;
   GameStatusEnum = gameStatus;
   vote = vote;
   designedVictim = undefined;
-  instruction: string = "Players";
-  gameStep: gameStep = gameStep.jour;
+  instruction: string = "Quelle carte voulez-vous voir ?";
+  gameStep: GameStep = GameStep.voyante;
 
   constructor(private apiService: ApiService) {
 
@@ -56,15 +56,26 @@ export class HomeComponent implements OnInit {
     this.newMessage= '';
     this.players = [];
     this.gameStatus = gameStatus.running;
-    //this.isDay = false;
     initializePlayers(this.players);
   }
 
-  playGame(player: Player) {
+  subscribtionCall (response: any) {
 
-    const subscribtionCall = (nightResponse: any) => {
-      const myPlayer = this.players.find(p => p.name === nightResponse.name);
-      this.messages.push(`MJ: ${nightResponse.message} ${nightResponse.name}`);
+    const myPlayer = this.players.find(p => p.name === response.name);
+    this.messages.push(`MJ: ${response.message} ${response.name}`);
+    if(myPlayer){
+      myPlayer.isDead = true;
+      const filteredPlayers = this.players.filter(player => !player.isDead)
+      this.gameStatus = checkIfGameIsOver(filteredPlayers);
+    }
+  }
+
+  villagerVote(player: Player) {
+
+    const subscribtionCall2 = (response: any) => {
+
+      const myPlayer = this.players.find(p => p.name === response.name);
+      this.messages.push(`MJ: ${response.message} ${response.name}`);
       if(myPlayer){
         myPlayer.isDead = true;
         const filteredPlayers = this.players.filter(player => !player.isDead)
@@ -73,21 +84,45 @@ export class HomeComponent implements OnInit {
     }
 
     if(this.gameStatus === gameStatus.running){
-      //console.log("appelle getDay avec la victime "+ player.name);
       this.messages.push(`MJ: vous avez voté contre ${player.name}`);
       const filteredPlayers = this.players.filter(player => !player.isDead)
-      this.apiService.getDay(filteredPlayers).subscribe(subscribtionCall);
-    }
 
-
-    if(this.gameStatus === gameStatus.running){
-      const filteredPlayers = this.players.filter(player => !player.isDead)
-      this.apiService.getNight(filteredPlayers).subscribe(subscribtionCall);
+      this.apiService.getDay(filteredPlayers).subscribe(subscribtionCall2);
     }
   };
 
-  startGame(player: Player): void {
-    this.playGame(player);
+  wolfVote(){
+
+    const subscribtionCall2 = (response: any) => {
+
+      const myPlayer = this.players.find(p => p.name === response.name);
+      this.messages.push(`MJ: ${response.message} ${response.name}`);
+      if(myPlayer){
+        myPlayer.isDead = true;
+        const filteredPlayers = this.players.filter(player => !player.isDead)
+        this.gameStatus = checkIfGameIsOver(filteredPlayers);
+      }
+    }
+
+    if(this.gameStatus === gameStatus.running){
+      const filteredPlayers = this.players.filter(player => !player.isDead)
+      this.apiService.getNight(filteredPlayers).subscribe(subscribtionCall2);
+    }
   }
 
+  selectPlayer(player: Player){
+    switch(this.gameStep){
+      case GameStep.jour:
+        this.villagerVote(player);
+        this.instruction = "Quelle carte voulez-vous voir ?"
+        this.gameStep = GameStep.voyante;
+        break;
+      case GameStep.voyante:
+        this.messages.push(`MJ: Vous avez utilisé votre pouvoir de voyante : ${player.name} est ${player.power}`);
+        this.wolfVote();
+        this.instruction = "Votez pour tuer un loup :"
+        this.gameStep = GameStep.jour;
+        break;
+    }
+  }
 }
