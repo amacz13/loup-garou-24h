@@ -4,7 +4,7 @@
     <section class="players">
       <h2>Players</h2>
       <div class="player-grid">
-        <button class="player" *ngFor="let player of players" (click)="vote(player)">
+        <button class="player" *ngFor="let player of players" (click)="vote(player, players)">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
           <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Tuer' }}</div>
           <p>{{ player.name }}</p>
@@ -21,12 +21,12 @@
       <button (click)="sendMessage()">Send</button>
     </section>
   </div>
-  <div *ngIf="gameStatus !== 'running'" class="modal">
+  <div *ngIf="gameStatus !== GameStatusEnum.running" class="modal">
     <div class="modal-content">
       <h2>Game Over</h2>
       <p>Le jeu est terminé.</p>
-      <p *ngIf="gameStatus === 'werewolfesWon'">Les loups-garous ont gagné ! Bravo !</p>
-      <p *ngIf="gameStatus === 'villagersWon'">Les villageois ont gagné ! Bravo !</p>
+      <p *ngIf="gameStatus === GameStatusEnum.werewolfesWon">Les loups-garous ont gagné ! Bravo !</p>
+      <p *ngIf="gameStatus === GameStatusEnum.villagersWon">Les villageois ont gagné ! Bravo !</p>
       <button (click)="initializeGame()">Rejouer</button>
     </div>
   </div>

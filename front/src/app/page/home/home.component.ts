@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { HeaderComponent } from '../../components/header/header.component';
 import { Power, Role } from '../../entity/player.model';
 import { initializePlayers } from '../../utils/initialize-players.utils';
+import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 
 export interface Player {
   name: string;
@@ -25,9 +26,11 @@ export class HomeComponent implements OnInit {
   messages: string[] = [];
   newMessage: string = '';
   players: Player[] = [];
-  gameStatus: "running" | "villagersWon" | "werewolfesWon" = "running";
+  gameStatus: gameStatus = gameStatus.running;
   isDay: boolean = false;
-  playerRole: Role = Role.Villager
+  playerRole: Role = Role.Villager;
+  GameStatusEnum = gameStatus;
+  vote = vote;
 
   constructor(private apiService: ApiService) {
 
@@ -37,33 +40,6 @@ export class HomeComponent implements OnInit {
     this.initializeGame();
   }
 
-  initializeGame() {
-    this.messages= [];
-    this.newMessage= '';
-    this.players = [];
-    this.gameStatus = "running";
-    this.isDay = false;
-    initializePlayers(this.players);
-    this.startGame();
-  }
-
-  checkIfGameIsOver(){
-    const remainingVillagers = this.players.find(p =>
-      p.isDead === false && p.role === Role.Villager
-    );
-
-    if(!remainingVillagers){
-      this.gameStatus = "werewolfesWon"
-    }
-
-    const remainingWerewolfes = this.players.find(p =>
-      p.isDead === false && p.role === Role.Werewolf
-    );
-    if(!remainingWerewolfes){
-      this.gameStatus = "villagersWon"
-    }
-  }
-
   sendMessage() {
     if (this.newMessage.trim() !== '') {
       this.messages.push(`You: ${this.newMessage}`);
@@ -71,12 +47,14 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  vote(player: Player) {
-    const myPlayer = this.players.find(p => p.name === player.name);
-    if(myPlayer){
-      myPlayer.isDead = true;
-      this.checkIfGameIsOver();
-    }
+  initializeGame() {
+    this.messages= [];
+    this.newMessage= '';
+    this.players = [];
+    this.gameStatus = gameStatus.running;
+    this.isDay = false;
+    initializePlayers(this.players);
+    this.startGame();
   }
 
   playGame() {
@@ -89,10 +67,10 @@ export class HomeComponent implements OnInit {
       if(myPlayer){
         myPlayer.isDead = true;
 
-        this.checkIfGameIsOver();
+        this.gameStatus = checkIfGameIsOver(this.players);
       }
 
-      if(this.gameStatus === "running"){
+      if(this.gameStatus === gameStatus.running){
         this.isDay = !this.isDay;
         this.playGame();
       }
