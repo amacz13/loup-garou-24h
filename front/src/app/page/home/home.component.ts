@@ -22,6 +22,7 @@ export class HomeComponent implements OnInit {
   newMessage: string = '';
   players: Player[] = [];
   gameStatus: "running" | "villagersWon" | "werewolfesWon" = "running";
+  isDay: boolean = false;
 
   constructor(private apiService: ApiService) {
 
@@ -52,6 +53,7 @@ export class HomeComponent implements OnInit {
     this.newMessage= '';
     this.players = [];
     this.gameStatus = "running";
+    this.isDay = false;
     this.initializePlayers();
     this.startGame();
   }
@@ -104,39 +106,32 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  getAnswer(): Promise<{name:string, message: string}> {
-    return new Promise<{name:string, message: string}>((resolve) => {
-      setTimeout(() => {
-        const alivePlayers = this.players.filter(player => !player.isDead); // Filter out dead players
-        if (alivePlayers.length === 0) {
-          resolve({name: "no player", message: "message test"});
-        } else {
-          const randomIndex = Math.floor(Math.random() * alivePlayers.length); // Generate a random index
-          const randomPlayerName = alivePlayers[randomIndex].name; // Get the player name at the random index
-          resolve({name: randomPlayerName, message: "message test"}); // Resolve the promise with the random player name
-        }
-      }, 2000); // 2000 milliseconds = 2 seconds
-    });
-  }
-
-  getAnswerRecursively() {
-    this.getAnswer().then((response) => {
-      const myPlayer = this.players.find(p => p.name === response.name);
-      this.messages.push(`MJ: ${response.message}`);
-      if(myPlayer){
-        myPlayer.isDead = true;
-        this.checkIfGameIsOver();
-      }
-      if(this.gameStatus === "running"){
-        this.getAnswerRecursively();
-      }
-    });
-  }
-
   startGame(): void {
-    //this.getAnswerRecursively();
-    this.apiService.getNight(this.players).subscribe((res) => {
-      console.log(res);
-    });
+    const playGame = () => {
+
+      const filteredPlayers = this.players.filter(player => !player.isDead)
+
+      const subscribtionCall = (nightResponse: any) => {
+        const myPlayer = this.players.find(p => p.name === nightResponse.name);
+        this.messages.push(`MJ: ${nightResponse.message}`);
+        if(myPlayer){
+          myPlayer.isDead = true;
+          this.checkIfGameIsOver();
+        }
+
+        if(this.gameStatus === "running"){
+          this.isDay = !this.isDay;
+          playGame();
+        }
+      }
+
+      this.isDay ?
+        this.apiService.getDay(filteredPlayers).subscribe(subscribtionCall)
+       : this.apiService.getNight(filteredPlayers).subscribe(subscribtionCall);
+
+    };
+
+    playGame();
   }
+
 }
