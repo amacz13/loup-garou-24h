@@ -1,6 +1,7 @@
 import {fileURLToPath} from "url";
 import path from "path";
 import {LlamaModel, LlamaContext, LlamaChatSession} from "node-llama-cpp";
+import PromptSync from "prompt-sync";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -10,9 +11,11 @@ const model = new LlamaModel({
 const context = new LlamaContext({model});
 const session = new LlamaChatSession({context});
 
-
-const q1 = "Bonjour, je suis Axel ! Comment vas-tu ?";
-console.log("User: " + q1);
-
-const a1 = await session.prompt(q1);
-console.log("AI: " + a1);
+let userSentence = '';
+do {
+    userSentence = PromptSync()(`Saisir votre question : `);
+    if (userSentence !== 'Bye') {
+        const a1 = await session.prompt(userSentence);
+        console.log(a1);
+    }
+} while (userSentence !== 'Bye');
