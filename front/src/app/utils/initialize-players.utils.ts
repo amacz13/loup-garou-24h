@@ -10,8 +10,6 @@ import { Player } from "../page/home/home.component";
   // Function to assign roles
   function assignRole(index: number, chosenPower: Power): [Role, Power] {
     if (index === 0) {
-      console.log(chosenPower);
-
       return [chosenPower === Power.Loup ? Role.Werewolf : Role.Villager, chosenPower];
     } else if(index === 1) {
       return chosenPower === Power.Loup ?  [Role.Villager, Power.Simple] : [Role.Werewolf, Power.Loup]
@@ -53,7 +51,6 @@ export function initializePlayers(players: Array<Player>) {
       isReal: i === 0, // The first player is the real player
      });
   }
-  console.log(players);
 }
 
 
@@ -63,5 +60,4 @@ export function assignRolesToPlayers(players: Array<Player>, chosenPower: Power)
      players[i].role = role;
      players[i].power = power;
   }
-  console.log(players);
 }
