@@ -25,6 +25,10 @@ export interface PlayerReason {
     reason: string;
 }
 
+/**
+ * doDayVote: Do a day round where all players vote to eliminate one of them
+ * @param playerList The list of all remaining players
+ */
 export async function doDayVote(playerList: Player[]): Promise<Result> {
     playerList = randomizePlayerArray(playerList);
     console.log("☀️ Le jour se lève !")
@@ -50,7 +54,7 @@ export async function doDayVote(playerList: Player[]): Promise<Result> {
             //console.log("playerRes",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
             target =  jsonRes.who;
-            reason =  jsonRes.reason;
+            reason =  jsonRes.why;
             await plContext.dispose();
             await model.dispose()
         } catch (e) {
@@ -90,7 +94,10 @@ export async function doDayVote(playerList: Player[]): Promise<Result> {
     };
 }
 
-
+/**
+ * doNightVote: Do a night round where wolves vote to eliminate a villager
+ * @param playerList The list of all remaining players
+ */
 export async function doNightVote(playerList: Player[]): Promise<Result> {
     playerList = randomizePlayerArray(playerList);
     console.log("🌙️ La nuit arrive !")
@@ -112,7 +119,7 @@ export async function doNightVote(playerList: Player[]): Promise<Result> {
             });
             const plContext = await model.createContext({batchSize: 0});
             const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
-            const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
+            const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. ${votes.length > 0 ? 'Tes partenaires ont voté pour '+ votes.join(',') +'. ' : ''} Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
             const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.15});
             //console.log("playerRes",playerRes)
             const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
@@ -154,6 +161,10 @@ export async function doNightVote(playerList: Player[]): Promise<Result> {
     };
 }
 
+/**
+ * randomizePlayerArray: Randomize an array
+ * @param array The array to randomize
+ */
 function randomizePlayerArray(array: any[]) {
     return array.map(value => ({ value, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
