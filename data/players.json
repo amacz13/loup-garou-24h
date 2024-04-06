@@ -1,0 +1,32 @@
+{
+  "players": [
+    {
+      "name": "Jean-Maurice",
+      "role": "villageois"
+    },
+    {
+      "name": "Jean-Michel",
+      "role": "villageois"
+    },
+    {
+      "name": "Jean-Pierre",
+      "role": "villageois"
+    },
+    {
+      "name": "Jean-Paul",
+      "role": "villageois"
+    },
+    {
+      "name": "Jean-Luc",
+      "role": "villageois"
+    },
+    {
+      "name": "Jean-Claude",
+      "role": "loup-garou"
+    },
+    {
+      "name": "Jean-Christophe",
+      "role": "loup-garou"
+    }
+  ]
+}
