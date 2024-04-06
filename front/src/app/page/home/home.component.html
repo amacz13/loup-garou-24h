@@ -1,0 +1,41 @@
+<header>
+  <section class="game-info">
+    <p>Day/Night Cycle</p>
+    <p>Time Remaining: <span id="time-remaining">0:00</span></p>
+    <button id="start-game-btn">Start Game</button>
+  </section>
+  <h1>Werewolf Game</h1>
+  <section class="player-role">
+    <h2>Your Role</h2>
+    <div class="role-card">
+      <p>You are a Villager</p>
+    </div>
+  </section>
+</header>
+<main>
+  <div class="container">
+    <section class="players">
+      <h2>Players</h2>
+      <div class="player-grid">
+        <div class="player" *ngFor="let player of players">
+          <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
+          <div class="overlay">Tuer</div>
+          <p>{{ player.name }}</p>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="conversation">
+      <div class="messages">
+        <div class="message" *ngFor="let message of messages">{{ message }}</div>
+      </div>
+      <input (keyup.enter)="sendMessage()" type="text" placeholder="Type your message..." [(ngModel)]="newMessage">
+      <button (click)="sendMessage()">Send</button>
+    </section>
+  </div>
+
+</main>
+<footer>
+  <p>&copy; 2024 Werewolf Game</p>
+</footer>
