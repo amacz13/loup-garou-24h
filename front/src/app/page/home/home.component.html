@@ -31,9 +31,10 @@
   </div>
   <div *ngIf="shouldChoosePower === true" class="modal">
     <div class="modal-content">
-      <h2>Choisissez votre rôle !</h2>
+      <h2>Vous incarnez {{playerName}}. Choisissez votre rôle !</h2>
       <button (click)="choosePower(Power.Loup)">Loup-garou</button>
       <button (click)="choosePower(Power.Simple)">Simple villageois</button>
+      <button disabled>Voyante (bientôt disponible)</button>
     </div>
   </div>
 </main>

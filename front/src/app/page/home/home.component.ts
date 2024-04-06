@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ApiService, EventResponse } from '../../services/api.service';
 import { HeaderComponent } from '../../components/header/header.component';
 import { Power, Role } from '../../entity/player.model';
-import { initializePlayers } from '../../utils/initialize-players.utils';
+import { assignRolesToPlayers, initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 import { GameStep } from '../../utils/game-steps.utils';
 
@@ -14,6 +14,7 @@ export interface Player {
   role: Role;
   power: Power;
   isDead: boolean;
+  isReal: boolean;
 }
 
 @Component({
@@ -33,9 +34,10 @@ export class HomeComponent implements OnInit {
   vote = vote;
   Power = Power;
   designedVictim = undefined;
-  instruction: string = "Qui voulez-vous dévorer ?";
+  instruction: string = "Votez pour tuer un loup :";
   gameStep: GameStep = GameStep.jour;
   shouldChoosePower: boolean = true;
+  playerName: string | undefined = undefined;
 
   constructor(private apiService: ApiService) {
 
@@ -58,6 +60,13 @@ export class HomeComponent implements OnInit {
     this.players = [];
     this.gameStatus = gameStatus.running;
     initializePlayers(this.players);
+    this.shouldChoosePower = true;
+    this.playerPower = Power.Simple;
+    this.GameStatusEnum = gameStatus;
+    this.designedVictim = undefined;
+    this.instruction = "Votez pour tuer un loup :";
+    this.gameStep = GameStep.jour;
+    this.playerName = this.players[0].name;
   }
 
   subscribtionCall (response: any) {
@@ -161,6 +170,6 @@ export class HomeComponent implements OnInit {
   choosePower(power: Power){
     this.playerPower = power;
     this.shouldChoosePower = false;
-    this.instruction = power === Power.Loup ? "Qui voulez-vous dévorer ?" : "Votez pour tuer un loup :";
+    assignRolesToPlayers(this.players, this.playerPower);
   }
 }
