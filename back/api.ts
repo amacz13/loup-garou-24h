@@ -1,7 +1,7 @@
 // Importer le module Express
 import express, {Request, Response } from "express";
 import bodyParser from "body-parser";
-import { Player, Result, doDayVote } from "./game-engine.js";
+import { Player, Result, doDayVote, doNightVote } from "./game-engine.js";
 
 // Créer une application Express
 const app = express();
@@ -32,9 +32,9 @@ app.get('/step/:stepNumber', (req: Request, res: Response) => {
 
 app.post('/jour', (req: Request, res: Response) => {
     const players: Player[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
+    const target:string = req.body.target;
     console.log(players);
-    const randomPlayer = getRandomPlayer(players); // Obtenir un joueur aléatoire
-    doDayVote(players).then( (response : Result) => {
+    doDayVote(players, target).then( (response : Result) => {
         console.log(response);
         let winner: string = response.selectedPlayerNameList[0];
         if(response.selectedPlayerNameList.length > 1 ) {
@@ -50,9 +50,18 @@ app.post('/jour', (req: Request, res: Response) => {
 
 app.post('/nuit', (req: Request, res: Response) => {
     const players: Player[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
+    const target:string = req.body.target;
     console.log(players);
-    const randomPlayer = getRandomPlayer(players); // Obtenir un joueur aléatoire
-    res.json({ name: randomPlayer.name, message: 'Les loups-garous ont décidés d\'éliminer' });
+    console.log(target);
+    doNightVote(players, target).then((response : Result) => {
+        console.log(response);
+        let winner: string = response.selectedPlayerNameList[0];
+        if(response.selectedPlayerNameList.length > 1 ) {
+            // On a une égalité, on prends un joueur au pif parmis l'égalité
+            winner = getRandomPlayerName(response.selectedPlayerNameList);
+        } 
+        res.json({ name: winner, message: 'Les loups-garous ont décidés d\'éliminer'});
+    });
 });
 
 // Démarrer le serveur sur le port 3000
