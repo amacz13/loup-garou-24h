@@ -99,16 +99,16 @@ export class HomeComponent {
     }
   }
 
-  getAnswer(): Promise<string> {
-    return new Promise<string>((resolve) => {
+  getAnswer(): Promise<{name:string, message: string}> {
+    return new Promise<{name:string, message: string}>((resolve) => {
       setTimeout(() => {
         const alivePlayers = this.players.filter(player => !player.isDead); // Filter out dead players
         if (alivePlayers.length === 0) {
-          resolve("No living players available");
+          resolve({name: "no player", message: "message test"});
         } else {
           const randomIndex = Math.floor(Math.random() * alivePlayers.length); // Generate a random index
           const randomPlayerName = alivePlayers[randomIndex].name; // Get the player name at the random index
-          resolve(randomPlayerName); // Resolve the promise with the random player name
+          resolve({name: randomPlayerName, message: "message test"}); // Resolve the promise with the random player name
         }
       }, 2000); // 2000 milliseconds = 2 seconds
     });
@@ -116,7 +116,8 @@ export class HomeComponent {
 
   getAnswerRecursively() {
     this.getAnswer().then((response) => {
-      const myPlayer = this.players.find(p => p.name === response);
+      const myPlayer = this.players.find(p => p.name === response.name);
+      this.messages.push(`MJ: ${response.message}`);
       if(myPlayer){
         myPlayer.isDead = true;
         this.checkIfGameIsOver();
