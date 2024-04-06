@@ -45,6 +45,7 @@ footer {
 
 .messages {
   height: 100%;
+  max-height: 400px;
   width: 300px; /* Adjust width as needed */
   border: 1px solid #ccc;
   overflow-y: auto;

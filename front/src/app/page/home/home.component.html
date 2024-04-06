@@ -14,8 +14,8 @@
 
     <section class="conversation">
       <div class="player-data">
-        <span class="player-role-label">Ton role : </span>
-        <span class="player-role-text">TENEUR DE PLACE</span>
+        <span class="player-role-label">Ton rôle : </span>
+        <span class="player-role-text">{{playerPower}}</span>
       </div>
       <div class="messages">
         <div class="message" *ngFor="let message of messages">{{ message }}</div>

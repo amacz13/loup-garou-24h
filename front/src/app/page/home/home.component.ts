@@ -80,7 +80,7 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  villagerVote(player: Player) {
+  villagerVote(isWolf: boolean, player: Player) {
 
     const subscribtionCall2 = (response: EventResponse) => {
 
