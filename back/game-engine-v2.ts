@@ -319,3 +319,9 @@ export async function chooseHunterKill(playerList: PlayerV2[]) {
     }
     return undefined;
 }
+
+export async function chooseClairvoyantChoice(playerList: PlayerV2[], clairvoyant: PlayerV2): Promise<PlayerV2> {
+    playerList = randomizePlayerArray(playerList);
+    console.log("🔎 C'est l'heure de la voyante !")
+    return processClairvoyant(playerList,clairvoyant);
+}
