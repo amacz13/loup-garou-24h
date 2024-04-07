@@ -26,12 +26,11 @@ export interface PlayerReasonV2 {
     reason: string;
 }
 
-export type Role = 'Loup Garou' | 'Villageois' | 'Voyante';
-
 export interface BasicPlayerV2 {
     name: string;
-    role: Role;
+    role: string;
     isReal: boolean;
+    power?: string;
 }
 
 export interface Voyante {

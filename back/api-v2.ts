@@ -33,6 +33,11 @@ app.get('/step/:stepNumber', (req: Request, res: Response) => {
 app.post('/jour', (req: Request, res: Response) => {
     const players: PlayerV2[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
     const target:string = req.body.target;
+    for (let player of players) {
+        if (player.power) {
+            player.role = player.power;
+        }
+    }
     console.log(players);
     doDayVote(players, target).then( (response : ResultV2) => {
         console.log(response);
@@ -51,6 +56,11 @@ app.post('/jour', (req: Request, res: Response) => {
 app.post('/nuit', (req: Request, res: Response) => {
     const players: PlayerV2[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
     const target:string = req.body.target;
+    for (let player of players) {
+        if (player.power) {
+            player.role = player.power;
+        }
+    }
     console.log(players);
     console.log(target);
     doNightVote(players, target).then((response : ResultV2) => {
