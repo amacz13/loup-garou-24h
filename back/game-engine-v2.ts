@@ -258,7 +258,7 @@ function randomizePlayerArray(array: any[]) {
         .map(({ value }) => value)
 }
 
-export async function chooseCupidonLovers(playerList: PlayerV2[]) {
+export async function chooseCupidonLovers(playerList: PlayerV2[]): Promise<PlayerV2[]> {
     playerList = randomizePlayerArray(playerList);
     console.log("❤️ C'est l'heure de Cupidon !")
     const model = await llama.loadModel({
@@ -292,7 +292,7 @@ export async function chooseCupidonLovers(playerList: PlayerV2[]) {
     return [];
 }
 
-export async function chooseHunterKill(playerList: PlayerV2[]) {
+export async function chooseHunterKill(playerList: PlayerV2[]): Promise<PlayerV2> {
     playerList = randomizePlayerArray(playerList);
     console.log("🔫️ C'est l'heure du chasseur !")
     const model = await llama.loadModel({
