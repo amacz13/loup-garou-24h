@@ -5,6 +5,12 @@
     color="#fff"
     type="ball-scale-multiple"
   >
-    <p style="font-size: 20px; color: white">Loading...</p>
+    <p>
+      @if (loadService.state() === 'day') {
+        Les autres villageois font leur choix
+      } @else {
+        La nuit est en cours. Prenez garde aux loups 🐺!
+      }
+    </p>
   </ngx-spinner>
 </router-outlet>
