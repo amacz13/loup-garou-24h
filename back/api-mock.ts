@@ -36,7 +36,7 @@ app.post('/nuit', (req: Request, res: Response) => {
     const players: Player[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
     console.log(players);
     const randomPlayer = getRandomPlayer(players); // Obtenir un joueur aléatoire
-    res.json({ name: randomPlayer.name, message: 'Les loups-garous ont décidés d\'éliminer' });
+    res.json({ name: randomPlayer.name, message: 'Les loups-garous ont décidé d\'éliminer' });
 });
 
 app.post('/chasseur', (req: Request, res: Response) => {

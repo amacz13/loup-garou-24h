@@ -70,7 +70,7 @@ app.post('/nuit', (req: Request, res: Response) => {
             // On a une égalité, on prends un joueur au pif parmis l'égalité
             winner = getRandomPlayerName(response.selectedPlayerNameList);
         } 
-        res.json({ name: winner, message: 'Les loups-garous ont décidés d\'éliminer'});
+        res.json({ name: winner, message: 'Les loups-garous ont décidé d\'éliminer'});
     });
 });
 

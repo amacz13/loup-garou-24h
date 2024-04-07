@@ -22,9 +22,29 @@ header {
   }
 }
 
+.title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 h1 {
   font-family: 'RubikScribble', sans-serif;
   font-size: 4rem;
   margin: 2rem 0;
 }
 
+.garou {
+  border-radius: 3rem;
+  border: 0.2rem solid #000A45;
+  filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
+  margin-left: 1rem;
+}
+
+.spin {
+  animation:2s rotate infinite linear;
+}
+
+@keyframes rotate{
+  100%{ transform:rotate(1turn) } // or 360deg
+}

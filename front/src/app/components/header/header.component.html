@@ -3,5 +3,8 @@
     <img [src]="gameStep === GameStep.jour ? './../../../assets/sun.png' : './../../../assets/moon.png'">
     <p>{{gameStep === GameStep.jour ? "Jour" : "Nuit"}}</p>
   </div>
-  <h1>Werewolf Game</h1>
+  <div class="title">
+    <h1>Jeu du loup</h1>
+    <img class="garou" src="./../../../assets/Garou.jpeg" alt="le plus beau" height="100" (click)="playEasterEgg()">
+  </div>
 </header>
