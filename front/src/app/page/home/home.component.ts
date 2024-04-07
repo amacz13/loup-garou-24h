@@ -95,6 +95,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     this.gameStep = GameStep.jour;
     this.playerName = this.players[0].name;
     this.isPlayerDead = false;
+    this.messages.push({author: "MJ", content: "Bienvenue mesdames et messieurs dans ce petit village de Thiercelieux ! Tout d'abord, vous allez devoir voter pour éliminer une personne que vous soupçonnez d'être loup-garou. A vos débats !"});
   }
   playerVote(isWolfSelection: boolean, player?: Player) {
 
