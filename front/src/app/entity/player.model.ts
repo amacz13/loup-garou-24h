@@ -5,8 +5,8 @@ export enum Role {
 
 export enum Power {
   Voyante = "Voyante",
-  Sorciere = "Sorcière",
-  Salvateur = "Salvateur",
+  Cupidon = "Cupidon",
+  Chasseur = "Chasseur",
   Loup = "Loup Garou",
   Simple = "Simple villageois"
 }

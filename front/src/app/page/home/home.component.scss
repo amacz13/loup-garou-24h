@@ -169,9 +169,11 @@ footer {
 }
 
 .role-choice {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 25px 25px;
 
   .player {
     position: relative;
