@@ -8,6 +8,7 @@ import { assignRolesToPlayers, initializePlayers } from '../../utils/initialize-
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 import { GameStep } from '../../utils/game-steps.utils';
 import {LoadService} from "../../services/load.service";
+import {response} from "express";
 
 export interface Player {
   name: string;
@@ -16,6 +17,7 @@ export interface Player {
   power: Power;
   isDead: boolean;
   isReal: boolean;
+  isLover: boolean;
   roleDetail: {
     knownPlayerList?: Array<Player>
   }
@@ -50,6 +52,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   shouldChoosePower: boolean = true;
   playerName: string | undefined = undefined;
   isPlayerDead: boolean = false;
+  selectedFirstLover?: Player;
 
   constructor(private apiService: ApiService, private loadService: LoadService) {
 
@@ -93,13 +96,43 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     this.GameStatusEnum = gameStatus;
     this.designedVictim = undefined;
     this.instruction = "Votez pour tuer un loup :";
-    this.gameStep = GameStep.jour;
+    this.gameStep = GameStep.cupidon;
     this.playerName = this.players[0].name;
     this.isPlayerDead = false;
     this.messages.push({author: "MJ", content: "Bienvenue mesdames et messieurs dans ce petit village de Thiercelieux ! Tout d'abord, vous allez devoir voter pour éliminer une personne que vous soupçonnez d'être loup-garou. A vos débats !"});
   }
-  playerVote(isWolfSelection: boolean, player?: Player) {
 
+  doCupidon() {
+    const cupidon = this.players.find(p => p.power === 'Cupidon');
+    console.log("Cupidon : ",cupidon)
+    if (cupidon?.isReal) {
+      this.instruction = "Vous êtes Cupidon, sélectionnez deux joueurs qui seront liés par le lien éternel de l'amour :";
+    } else {
+      this.loadService.state.set('cupid');
+      this.apiService.getCupid(this.players).then(response => {
+        if (response?.lovers && response.lovers?.length === 2) {
+          this.players = [...this.players.filter(p => p.name !== response.lovers[0]?.name && p.name !== response.lovers[1].name), {
+            ...response.lovers[0],
+            isLover: true
+          }, {
+            ...response.lovers[1],
+            isLover: true
+          }];
+          const realPlayer = this.players.find(p => p.isReal);
+          console.log(realPlayer);
+          if (realPlayer?.name === response.lovers[0].name) {
+            this.messages.push({author: "MJ", content: `Cupidon t'as choisi ! Tu es désormais amoureux de ${response.lovers[1]?.name}`});
+          } else if (realPlayer?.name === response.lovers[1].name) {
+            this.messages.push({author: "MJ", content: `Cupidon t'as choisi ! Tu es désormais amoureux de ${response.lovers[0]?.name}`});
+          } else {
+            this.messages.push({author: "MJ", content: `Cupidon a fait son choix !`});
+          }
+        } else this.messages.push({author: "MJ", content: `Cupidon n'a pas réussi à se décider, personne n'est lié par le pouvoir de l'amour...`});
+        this.gameStep = GameStep.jour;
+      })
+    }
+  }
+  playerVote(isWolfSelection: boolean, player?: Player) {
     if(this.gameStatus === gameStatus.running){
       const filteredPlayers = this.players.filter(player => !player.isDead)
       if(isWolfSelection){
@@ -135,7 +168,16 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
     if(myPlayer){
       myPlayer.isDead = true;
-      const filteredPlayers = this.players.filter(player => !player.isDead)
+      let filteredPlayers = this.players.filter(player => !player.isDead);
+      //Cupidon
+      if (myPlayer.isLover) {
+        const otherLover = this.players.find(p => p.isLover && p.name !== myPlayer.name);
+        if (otherLover) {
+          otherLover.isDead = true;
+          this.messages.push({author: "MJ", content: `${myPlayer.name} était amoureux de ${otherLover.name}, il l'emporte avec lui dans sa tombe...`});
+          filteredPlayers = this.players.filter(player => player.name !== otherLover.name);
+        }
+      }
       this.gameStatus = checkIfGameIsOver(filteredPlayers);
       this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
       // si chasseur, alors tuer quelqu'un
@@ -205,6 +247,24 @@ export class HomeComponent implements OnInit, AfterViewChecked {
           this.instruction = "Votez pour tuer un loup :";
           this.gameStep = GameStep.jour;
           break;
+      case GameStep.cupidon:
+        if (!this.selectedFirstLover) {
+          this.selectedFirstLover = player;
+          this.messages.push({author: "MJ", content: `${player.name} sera le premier amoureux`});
+        }
+        else {
+          this.players = [...this.players.filter(p => p.name !== this.selectedFirstLover?.name && p.name !== player.name), {
+            ...this.selectedFirstLover,
+            isLover: true
+          }, {
+            ...player,
+            isLover: true
+          }];
+          this.messages.push({author: "MJ", content: `${player.name} est le deuxième amoureux`});
+          this.instruction = "Votez pour tuer un loup :";
+          this.gameStep = GameStep.jour;
+        }
+        break;
     }
   }
 
@@ -212,6 +272,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     this.playerPower = power;
     this.shouldChoosePower = false;
     assignRolesToPlayers(this.players, this.playerPower);
+    this.doCupidon();
   }
 
   getEndMessage(){
