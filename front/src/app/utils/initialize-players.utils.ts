@@ -8,6 +8,7 @@ import { Player } from "../page/home/home.component";
 
   // Function to assign roles
   function assignRole(index: number, chosenPower: Power): [Role, Power] {
+    // écrire les trois rôles et pouvoirs en fonction de ceux de la personne qui joue
     if (index === 0) {
       return [chosenPower === Power.Loup ? Role.Werewolf : Role.Villager, chosenPower];
     } else if(index === 1) {

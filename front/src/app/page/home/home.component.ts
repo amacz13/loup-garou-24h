@@ -33,6 +33,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   gameStatus: gameStatus = gameStatus.running;
   playerPower: Power = Power.Simple;
   GameStatusEnum = gameStatus;
+  GameStep = GameStep;
   vote = vote;
   Power = Power;
   designedVictim = undefined;
@@ -139,33 +140,36 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
+  goToVoyante(){
+    if(this.playerPower === Power.Voyante){
+      this.instruction = "Quelle carte voulez-vous voir ?";
+      this.gameStep = GameStep.voyante;
+    }
+    else{
+      this.goToNight();
+    }
+  }
+
   goToNight(){
     if(this.playerPower === Power.Loup){
       this.instruction = "Qui voulez-vous dévorer ?";
       this.gameStep = GameStep.loups;
     }
     else{
+      this.instruction = "Votez pour tuer un loup :";
+      this.gameStep = GameStep.jour;
       setTimeout(() => this.playerVote(true), 1000);
     }
   }
 
   selectPlayer(player: Player){
     switch(this.gameStep){
-      //à décommenter si on implémente la voyante
-      /*case GameStep.jour:
-        this.villagerVote(player);
-        this.instruction = "Quelle carte voulez-vous voir ?";
-        this.gameStep = GameStep.voyante;
-        break;
-      case GameStep.voyante:
-        this.messages.push(`MJ: Vous avez utilisé votre pouvoir de voyante : ${player.name} est ${player.power}`);
-        this.wolfVote(player);
-        this.instruction = "Votez pour tuer un loup :"
-        this.gameStep = GameStep.jour;
-        break;*/
+        case GameStep.voyante:
+          this.messages.push(`MJ: Vous avez utilisé votre pouvoir de voyante : ${this.capitalizeFirstLetter(player.name)} est ${player.power}`);
+          this.goToNight();
+          break;
         case GameStep.jour:
-          this.playerVote(false, player).then(() => this.goToNight())
-          //this.goToNight();
+          this.playerVote(false, player).then(() => this.goToVoyante());
           break;
         case GameStep.loups:
           this.playerVote(true, player);

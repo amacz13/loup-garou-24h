@@ -7,7 +7,10 @@
         <button class="player" *ngFor="let player of players"
           (click)="selectPlayer(player)" [disabled]="player.isDead">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
-          <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Voter' }}</div>
+          <div *ngIf="gameStep !== GameStep.voyante || player.isDead" class="overlay" [class.dead]="player.isDead">
+            {{ player.isDead ? player.power : 'Voter' }}</div>
+            <div *ngIf="gameStep === GameStep.voyante && !player.isDead" class="overlay voyante" [class.dead]="player.isDead">
+              Voir</div>
           <p class="player-name">{{ capitalizeFirstLetter(player.name) }}</p>
           <p *ngIf="player.name === players[0].name">(vous)</p>
           <p *ngIf="playerPower === Power.Loup && player.power === Power.Loup && player.name !== players[0].name">(loup-garou)</p>
@@ -47,9 +50,9 @@
           <img src="assets/characters/villager.png" alt="Villageois" class="player-img">
           <p class="player-name">Villageois</p>
         </button>
-        <button class="player disabled" disabled>
+        <button class="player" (click)="choosePower(Power.Voyante)">
           <img src="assets/characters/crystalball.png" alt="Voyante" class="player-img">
-          <p class="player-name">Voyante (bientôt disponible)</p>
+          <p class="player-name">Voyante</p>
         </button>
       </div>
     </div>

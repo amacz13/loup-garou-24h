@@ -114,6 +114,14 @@ input[type="text"], button {
       &:hover, &.dead {
         opacity: 1;
       }
+
+      &.dead{
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+
+      &.voyante{
+        background-color: rgba(0, 10, 69, 0.7);
+      }
     }
 
     p {
