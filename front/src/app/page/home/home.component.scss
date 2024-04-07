@@ -54,6 +54,8 @@ footer {
   overflow-y: auto;
   margin-bottom: 1rem;
   padding: 1rem;
+  font-family: 'Cutive', sans-serif;
+  font-weight: bold;
 }
 
 .message {
@@ -106,7 +108,7 @@ input[type="text"], button {
       transition: opacity 0.3s ease;
       border-radius: 0rem;
       font-family: 'Burbank', sans-serif;
-      font-size: 3rem;
+      font-size: 2rem;
       text-shadow: 0.1rem 0.1rem 0.1rem #000A45;
 
       &:hover, &.dead {
@@ -119,6 +121,7 @@ input[type="text"], button {
       font-family: 'Burbank', sans-serif;
       font-size: 1.5rem;
       color: #000A45;
+      text-shadow: 0.1rem 0.1rem 0.1rem #AAA;
       margin-top: 1rem;
     }
   }
@@ -137,10 +140,67 @@ input[type="text"], button {
 }
 
 .modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 40%;
   background-color: #fff;
   padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+  border: 0.4rem solid #000A45;
+  filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
+  font-family: 'Burbank', sans-serif;
+  font-size: 1.5rem;
+}
+
+.role-choice {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+
+  .player {
+    position: relative;
+    background: hsla(43, 84%, 85%, 1);
+    background: linear-gradient(315deg, hsla(43, 84%, 85%, 1) 0%, hsla(325, 71%, 70%, 1) 50%, hsla(236, 67%, 55%, 1) 100%);
+    border-radius: 0.5rem;
+    border: 0.4rem solid #000A45;
+    filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
+    padding: 0.9rem;
+    width: 25%;
+
+    .player-img {
+      width: 100%;
+      border-radius: 0.5rem;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+
+    p {
+      text-align: center;
+      font-family: 'Burbank', sans-serif;
+      font-size: 1.5rem;
+      color: #000A45;
+      text-shadow: 0.1rem 0.1rem 0.1rem #AAA;
+      margin-top: 1rem;
+    }
+
+    &.disabled {
+      opacity: 0.5;
+    }
+  }
+}
+
+.role-choice-button {
+  background: hsla(43, 84%, 85%, 1);
+  background: linear-gradient(315deg, hsla(43, 84%, 85%, 1) 0%, hsla(325, 71%, 70%, 1) 50%, hsla(236, 67%, 55%, 1) 100%);
+  border-radius: 0.5rem;
+  border: 0.4rem solid #000A45;
+  filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
+  padding: 0.5rem;
 }
 
 .player-title {

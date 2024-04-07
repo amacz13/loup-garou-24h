@@ -38,9 +38,20 @@
   <div *ngIf="shouldChoosePower === true" class="modal">
     <div class="modal-content">
       <h2>Vous incarnez {{capitalizeFirstLetter(playerName)}}. Choisissez votre rôle !</h2>
-      <button (click)="choosePower(Power.Loup)">Loup-garou</button>
-      <button (click)="choosePower(Power.Simple)">Simple villageois</button>
-      <button disabled>Voyante (bientôt disponible)</button>
+      <div class="role-choice">
+        <button class="player" (click)="choosePower(Power.Loup)">
+          <img src="assets/characters/werewolf.png" alt="Loup-garou" class="player-img">
+          <p class="player-name">Loup-garou</p>
+        </button>
+        <button class="player" (click)="choosePower(Power.Simple)">
+          <img src="assets/characters/villager.png" alt="Villageois" class="player-img">
+          <p class="player-name">Villageois</p>
+        </button>
+        <button class="player disabled" disabled>
+          <img src="assets/characters/crystalball.png" alt="Voyante" class="player-img">
+          <p class="player-name">Voyante (bientôt disponible)</p>
+        </button>
+      </div>
     </div>
   </div>
 </main>
