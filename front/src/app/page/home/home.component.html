@@ -32,8 +32,6 @@
           </p>
         </div>
       </div>
-      <input (keyup.enter)="sendMessage()" type="text" placeholder="Type your message..." [(ngModel)]="newMessage">
-      <button (click)="sendMessage()">Send</button>
     </section>
   </div>
   <div *ngIf="gameStatus !== GameStatusEnum.running" class="modal">
