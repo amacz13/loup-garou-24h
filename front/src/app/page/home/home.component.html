@@ -39,7 +39,7 @@
       <h2>Game Over</h2>
       <p>Le jeu est terminé.</p>
       <p>{{getEndMessage()}}</p>
-      <button (click)="initializeGame()">Rejouer</button>
+      <button class="replay-btn" (click)="initializeGame()">Rejouer</button>
     </div>
   </div>
   <div *ngIf="shouldChoosePower === true" class="modal">

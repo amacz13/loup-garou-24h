@@ -152,6 +152,16 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
+
+  .replay-btn {
+    font-family: 'Burbank', sans-serif;
+    color: white;
+    font-size: 2rem;
+    padding: 1rem 2rem;
+    border-radius: 3rem;
+    border: 0.3rem solid #000A45;
+    background-color: #000A45;
+  }
 }
 
 .modal-content {
