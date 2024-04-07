@@ -40,3 +40,11 @@ h1 {
   filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
   margin-left: 1rem;
 }
+
+.spin {
+  animation:2s rotate infinite linear;
+}
+
+@keyframes rotate{
+  100%{ transform:rotate(1turn) } // or 360deg
+}
