@@ -17,9 +17,9 @@ import { Player } from "../page/home/home.component";
     }  else if(index === 3) {
       return chosenPower === Power.Voyante ?  [Role.Villager, Power.Simple] : [Role.Villager, Power.Voyante]
     }  else if(index === 4) {
-      return [Role.Villager, Power.Sorciere];
+      return chosenPower === Power.Chasseur ?  [Role.Villager, Power.Simple] : [Role.Villager, Power.Chasseur]
     } else if(index === 5) {
-      return [Role.Villager, Power.Salvateur];
+      return chosenPower === Power.Cupidon ?  [Role.Villager, Power.Simple] : [Role.Villager, Power.Cupidon]
     } else {
       return [Role.Villager, Power.Simple];
     }
