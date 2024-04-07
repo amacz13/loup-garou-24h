@@ -62,14 +62,20 @@ export async function doDayVote(playerList: Player[], playerVote?: string): Prom
             const playerPrompt = `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${ player.role === 'Loup Garou' ? playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",") : playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication drôle et rigolote de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
             const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
             //console.log(" <- ",playerRes)
-            const curlyBracesInclusive = /\{([^}]+)\}/
-            const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive)
-            console.log("arrRes",arrRes)
-            if (arrRes) {
-                const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+            try {
+                const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
                 target = jsonRes.who.toLowerCase().normalize("NFC");
                 reason = jsonRes.why;
                 votesAsSet.add(target);
+            } catch {
+                const curlyBracesInclusive = /\{([^}]+)\}/
+                const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive);
+                if (arrRes) {
+                    const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+                    target = jsonRes.who.toLowerCase().normalize("NFC");
+                    reason = jsonRes.why;
+                    votesAsSet.add(target);
+                }
             }
             await plContext.dispose();
             await model.dispose()
@@ -139,12 +145,16 @@ export async function doNightVote(playerList: Player[], playerVote?: string): Pr
             const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
             const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. ${votes.length > 0 ? 'Tes partenaires ont voté pour '+ votes.join(',') +'. ' : ''} Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
             const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
-            const curlyBracesInclusive = /\{([^}]+)\}/
-            const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive)
-            console.log("arrRes",arrRes)
-            if (arrRes) {
-                const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+            try {
+                const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
                 target = jsonRes.who.toLowerCase().normalize("NFC");
+            } catch {
+                const curlyBracesInclusive = /\{([^}]+)\}/
+                const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive);
+                if (arrRes) {
+                    const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+                    target = jsonRes.who.toLowerCase().normalize("NFC");
+                }
             }
         } catch (e) {
             console.error("Une erreur est survenue : ",e);
