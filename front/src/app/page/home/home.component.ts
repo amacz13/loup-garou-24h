@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService, EventResponse } from '../../services/api.service';
 import { HeaderComponent } from '../../components/header/header.component';
@@ -24,7 +24,8 @@ export interface Player {
   styleUrls: ['./home.component.scss'],
   imports:[FormsModule, NgFor, NgIf, HeaderComponent]
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, AfterViewChecked {
+  @ViewChild('scrollContainer') scrollContainer!: ElementRef;
   messages: string[] = [];
   newMessage: string = '';
   players: Player[] = [];
@@ -42,6 +43,22 @@ export class HomeComponent implements OnInit {
 
   constructor(private apiService: ApiService) {
 
+  }
+
+
+
+  maxHeight = 500; // Example max height in pixels
+
+  // Method to scroll to the bottom of the div
+  scrollToBottom(): void {
+    if (this.scrollContainer) {
+      this.scrollContainer.nativeElement.scrollTop = this.scrollContainer.nativeElement.scrollHeight;
+    }
+  }
+
+  // Lifecycle hook called after the view has been checked
+  ngAfterViewChecked(): void {
+    this.scrollToBottom();
   }
 
   ngOnInit(): void {
@@ -164,6 +181,7 @@ export class HomeComponent implements OnInit {
     const firstLine = this.gameStatus === this.GameStatusEnum.villagersWon ? "villageois" : "loups-garous";
     const secondLine = this.players[0].power === Power.Loup && this.gameStatus === this.GameStatusEnum.werewolfesWon
     || this.players[0].power !== Power.Loup && this.gameStatus === this.GameStatusEnum.villagersWon ? "Félicitations !" : "Dommage, vous ferez mieux la prochaine fois !";
-    return `Les ${firstLine} ont gagné ! ${secondLine}`;
+    const thirdLine = this.isPlayerDead ? "Vous n'avez pas survécu à cette partie." : "";
+    return `${thirdLine} Les ${firstLine} ont gagné ! ${secondLine}`;
   }
 }

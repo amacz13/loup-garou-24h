@@ -20,7 +20,7 @@
         <span class="player-role-label">Ton rôle : </span>&nbsp;
         <span class="player-role-text">{{playerPower}}</span>
       </div>
-      <div class="messages">
+      <div class="messages" #scrollContainer [style.max-height.px]="maxHeight">
         <div class="message" *ngFor="let message of messages">{{ message }}</div>
       </div>
       <input (keyup.enter)="sendMessage()" type="text" placeholder="Type your message..." [(ngModel)]="newMessage">
