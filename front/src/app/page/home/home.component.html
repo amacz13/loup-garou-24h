@@ -8,7 +8,7 @@
           (click)="selectPlayer(player)" [disabled]="player.isDead">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
           <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Tuer' }}</div>
-          <p class="player-name">{{ player.name }}</p>
+          <p class="player-name">{{ capitalizeFirstLetter(player.name) }}</p>
         </button>
       </div>
     </section>
@@ -36,7 +36,7 @@
   </div>
   <div *ngIf="shouldChoosePower === true" class="modal">
     <div class="modal-content">
-      <h2>Vous incarnez {{playerName}}. Choisissez votre rôle !</h2>
+      <h2>Vous incarnez {{capitalizeFirstLetter(playerName)}}. Choisissez votre rôle !</h2>
       <button (click)="choosePower(Power.Loup)">Loup-garou</button>
       <button (click)="choosePower(Power.Simple)">Simple villageois</button>
       <button disabled>Voyante (bientôt disponible)</button>

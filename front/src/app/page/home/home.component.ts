@@ -111,6 +111,13 @@ export class HomeComponent implements OnInit {
     }
   };
 
+  capitalizeFirstLetter(str?: string): string | undefined {
+    if(!str){
+      return undefined;
+    }
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
   goToNight(){
     if(this.playerPower === Power.Loup){
       this.instruction = "Qui voulez-vous dévorer ?";
