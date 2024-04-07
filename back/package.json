@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "run": "node index.js",
-    "server": "npx tsc && npx ts-node api",
+    "server-v1": "npx tsc && npx ts-node api",
+    "server": "npx tsc && npx ts-node api-v2",
     "server-mock": "npx tsc && npx ts-node api-mock",
     "debug": "npx tsc && npx ts-node debug",
     "debug-v2": "npx tsc && npx ts-node debug-v2",

@@ -5,9 +5,10 @@ import {getLlama, Llama, LlamaChatSession, LlamaLogLevel} from "node-llama-cpp";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startPrompt = '<|system|>\n' +
     '</s>\n' +
-    '<|user|>'
+    '<|user|>';
 const endPrompt = '</s>\n' +
-    '<|assistant|>'
+    '<|assistant|>';
+const llama = await getLlama({logLevel: LlamaLogLevel.error});
 
 const engine = "zephyr-7b-beta.Q4_K_M.gguf";
 
@@ -43,7 +44,7 @@ export interface PlayerV2 extends BasicPlayerV2 {
 }
 
 function generateClairvoyantPrompt(player: PlayerV2) {
-    return player.roleDetail?.knownPlayerList.map(p => `${p.name} est ${p.role}`).join(', ');
+    return player.roleDetail?.knownPlayerList.map(p => `${p.name} est un ${p.role}`).join(', ');
 }
 
 function generateDayPrompt(player: PlayerV2, playerList: PlayerV2[], votesAsSet: Set<string>) {
@@ -51,7 +52,7 @@ function generateDayPrompt(player: PlayerV2, playerList: PlayerV2[], votesAsSet:
         case "Loup Garou":
             return `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${playerList.filter(p => p.role !== 'Loup Garou' ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication drôle et fun de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
         case "Voyante":
-            return `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""}. ${player.roleDetail?.knownPlayerList?.length && player.roleDetail?.knownPlayerList?.length > 0 ? 'Comme tu es la voyante, tu sais que ' + generateClairvoyantPrompt(player) : ''} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication drôle et fun de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
+            return `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""}. ${player.roleDetail?.knownPlayerList?.length && player.roleDetail?.knownPlayerList?.length > 0 ? 'Comme tu es la voyante, tu est certain que ' + generateClairvoyantPrompt(player) : ''} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication drôle et fun de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
         default:
             return `Ton nom est ${player.name}, tu es un ${player.role} et les habitants du village meurent toutes les nuits à cause des loups-garous. Les autres joueurs sont ${playerList.filter(p => p.name !== player.name ).map(p => p.name).join(",")}. ${votesAsSet.size > 0 ? "Actuellement, les joueurs accusés sont " + [...votesAsSet].join(',')+". " : ""} C'est à toi de voter, qui veux tu éliminer ? Réfléchis étape par étape. Réponds avec un JSON de la forme : { why: 'Créer une courte explication drôle et fun de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter'}. Réponds avec le JSON et rien d'autre avant ou après.`;
     }
@@ -64,8 +65,7 @@ function generateDayPrompt(player: PlayerV2, playerList: PlayerV2[], votesAsSet:
  */
 export async function doDayVote(playerList: PlayerV2[], playerVote?: string): Promise<ResultV2> {
     playerList = randomizePlayerArray(playerList);
-    console.log("☀️ Le jour se lève !")
-    const llama = await getLlama({logLevel: LlamaLogLevel.error});
+    console.log("☀️ Le jour se lève !");
     const votes = [];
     const votesAsSet = new Set<string>();
     if (playerVote) {
@@ -90,10 +90,21 @@ export async function doDayVote(playerList: PlayerV2[], playerVote?: string): Pr
             const playerPrompt = generateDayPrompt(player, playerList, votesAsSet);
             const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
             //console.log(" <- ",playerRes)
-            const jsonRes = JSON.parse(playerRes.replace("<|assistant|>",""));
-            target = jsonRes.who.toLowerCase().normalize("NFC");
-            reason = jsonRes.why;
-            votesAsSet.add(target);
+            try {
+                const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
+                target = jsonRes.who.toLowerCase().normalize("NFC");
+                reason = jsonRes.why;
+                votesAsSet.add(target);
+            } catch {
+                const curlyBracesInclusive = /\{([^}]+)\}/
+                const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive);
+                if (arrRes) {
+                    const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+                    target = jsonRes.who.toLowerCase().normalize("NFC");
+                    reason = jsonRes.why;
+                    votesAsSet.add(target);
+                }
+            }
             await plContext.dispose();
             await model.dispose()
         } catch (e) {
@@ -133,7 +144,7 @@ export async function doDayVote(playerList: PlayerV2[], playerVote?: string): Pr
     };
 }
 
-async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2, llama: Llama): Promise<PlayerV2> {
+async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2): Promise<PlayerV2> {
     try {
         const model = await llama.loadModel({
             modelPath: path.join(__dirname, "models", engine)
@@ -144,7 +155,7 @@ async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2,
         const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
         console.log("Clairvoyant res ",playerRes)
         const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
-        const seenPlayer = playerList.find(p => p.name === jsonRes.who);
+        const seenPlayer = playerList.find(p => p.name === jsonRes.who.toLowerCase().normalize("NFC"));
         return {
             ...clairvoyant,
             roleDetail: {
@@ -163,7 +174,6 @@ async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2,
 export async function doNightVote(playerList: PlayerV2[], playerVote?: string): Promise<NightResultV2> {
     playerList = randomizePlayerArray(playerList);
     console.log("🌙️ La nuit arrive !")
-    const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
     if (playerVote) votes.push(playerVote);
     const result: NightResultV2 = {
@@ -176,7 +186,7 @@ export async function doNightVote(playerList: PlayerV2[], playerVote?: string): 
 
     const clairvoyant = playerList.find(p => p.role === 'Voyante' && !p.isReal);
     if (clairvoyant) {
-        result.updatedPlayerList = [...playerList.filter(p => p.role !== 'Voyante'), await processClairvoyant(playerList,clairvoyant,llama)];
+        result.updatedPlayerList = [...playerList.filter(p => p.role !== 'Voyante'), await processClairvoyant(playerList,clairvoyant)];
     }
 
     for (const wolf of wolves.filter(p => !p.isReal)) {
@@ -192,10 +202,17 @@ export async function doNightVote(playerList: PlayerV2[], playerVote?: string): 
             const playerPrompt = `Ton nom est ${wolf.name}, tu es un Loup Garou et les habitants du village meurent toutes les nuits à cause des loups-garous. C'est la nuit, et tu dois choisir d'éliminer un villageois parmi : ${villagers.map(p => p.name).join(",")}. ${votes.length > 0 ? 'Tes partenaires ont voté pour '+ votes.join(',') +'. ' : ''} Qui veux tu éliminer ? Réponds avec un JSON de la forme : { why: 'Créer une courte explication de ton choix en français', who: 'Nomme le joueur que tu souhaites éliminer ou None si tu ne souhaites pas voter' }. Réponds avec le JSON et rien d'autre avant ou après.`;
             const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
             //console.log(" <- ",playerRes)
-            const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
-            target = jsonRes.who.toLowerCase().normalize("NFC");
-            //reason = await funify(jsonRes.why, llama);
-            //console.log(" <- ",reason)
+            try {
+                const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
+                target = jsonRes.who.toLowerCase().normalize("NFC");
+            } catch {
+                const curlyBracesInclusive = /\{([^}]+)\}/
+                const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive);
+                if (arrRes) {
+                    const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+                    target = jsonRes.who.toLowerCase().normalize("NFC");
+                }
+            }
         } catch (e) {
             console.error("Une erreur est survenue : ",e);
         }
