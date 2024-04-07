@@ -169,7 +169,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       this.gameStep = GameStep.voyante;
     }
     else{
-      this.selectRandomPlayer();
       this.goToNight();
     }
   }
