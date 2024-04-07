@@ -27,7 +27,7 @@ export class ApiService {
     return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target}).toPromise();
   }
 
-  getDay(players: Player[], knownPlayerList: Player[], target?: string): Promise<EventResponse | undefined> {
-    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, knownPlayerList, target: target}).toPromise();
+  getDay(players: Player[], target?: string): Promise<EventResponse | undefined> {
+    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target}).toPromise();
   }
 }

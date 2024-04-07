@@ -7,7 +7,6 @@ import { Power, Role } from '../../entity/player.model';
 import { assignRolesToPlayers, initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 import { GameStep } from '../../utils/game-steps.utils';
-import {response} from "express";
 
 export interface Player {
   name: string;
@@ -16,7 +15,9 @@ export interface Player {
   power: Power;
   isDead: boolean;
   isReal: boolean;
-  knownPlayerList?: Array<Player>
+  roleDetail: {
+    knownPlayerList?: Array<Player>
+  }
 }
 
 interface Message {
@@ -48,7 +49,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   shouldChoosePower: boolean = true;
   playerName: string | undefined = undefined;
   isPlayerDead: boolean = false;
-  knownPlayerList: Array<Player> = [];
 
   constructor(private apiService: ApiService) {
 
@@ -111,7 +111,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         if(player){
           this.messages.push({author: "MJ", content: `Vous avez voté contre ${this.capitalizeFirstLetter(player.name)}.`});
         }
-        return this.apiService.getDay(filteredPlayers, this.knownPlayerList, player?.name).then(response => {
+        return this.apiService.getDay(filteredPlayers, player?.name).then(response => {
           if (response) this.handleApiResponse(response,isWolfSelection);
         });
       }
@@ -150,7 +150,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   selectRandomPlayer() {
     // Filter players that are not dead and not already in the knownPlayerList
     const availablePlayers = this.players.filter(player =>
-      !player.isDead && !this.knownPlayerList.some(knownPlayer => knownPlayer.name === player.name)
+      !player.isDead && !this.players.find(p => p.power === Power.Voyante)?.roleDetail.knownPlayerList?.some(knownPlayer => knownPlayer.name === player.name)
     );
 
     if (availablePlayers.length > 0) {
@@ -158,8 +158,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       const randomIndex = Math.floor(Math.random() * availablePlayers.length);
       const randomPlayer = availablePlayers[randomIndex];
 
-      // Add the selected player to the knownPlayerList
-      this.knownPlayerList.push(randomPlayer);
+      this.players.find(p => p.power === Power.Voyante)?.roleDetail.knownPlayerList?.push(randomPlayer);
+
     }
   }
 

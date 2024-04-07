@@ -48,6 +48,7 @@ export function initializePlayers(players: Array<Player>) {
       power: Power.Simple,
       isDead: false,
       isReal: i === 0, // The first player is the real player
+      roleDetail: {knownPlayerList: []}
      });
   }
 }
