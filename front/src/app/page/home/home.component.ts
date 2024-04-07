@@ -138,8 +138,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       const filteredPlayers = this.players.filter(player => !player.isDead)
       this.gameStatus = checkIfGameIsOver(filteredPlayers);
       this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
-      // si chasseur, alors tuer quelqu'un
-
       if(this.isPlayerDead){
         this.playerVote(!isWolfSelection);
       }
