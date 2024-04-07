@@ -84,6 +84,7 @@ input[type="text"], button {
 
   .player {
     position: relative;
+    height: 18rem;
     background: hsla(43, 84%, 85%, 1);
     background: linear-gradient(315deg, hsla(43, 84%, 85%, 1) 0%, hsla(325, 71%, 70%, 1) 50%, hsla(236, 67%, 55%, 1) 100%);
     border-radius: 0.5rem;
@@ -228,12 +229,13 @@ input[type="text"], button {
 }
 
 .player-data {
-  font-family: Arial, sans-serif;
+  font-family: Burbank, sans-serif;
   display: flex;
   justify-content: space-between;
   margin: 1rem 0 ;
+  font-size: 1.5rem;
 }
 
-.player-role-label {
-  font-weight: bold;
+.player-role-text {
+  text-decoration: underline;
 }
