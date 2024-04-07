@@ -159,4 +159,11 @@ export class HomeComponent implements OnInit {
     this.shouldChoosePower = false;
     assignRolesToPlayers(this.players, this.playerPower);
   }
+
+  getEndMessage(){
+    const firstLine = this.gameStatus === this.GameStatusEnum.villagersWon ? "villageois" : "loups-garous";
+    const secondLine = this.players[0].power === Power.Loup && this.gameStatus === this.GameStatusEnum.werewolfesWon
+    || this.players[0].power !== Power.Loup && this.gameStatus === this.GameStatusEnum.villagersWon ? "Félicitations !" : "Dommage, vous ferez mieux la prochaine fois !";
+    return `Les ${firstLine} ont gagné ! ${secondLine}`;
+  }
 }

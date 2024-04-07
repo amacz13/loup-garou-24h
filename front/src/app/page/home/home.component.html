@@ -7,15 +7,17 @@
         <button class="player" *ngFor="let player of players"
           (click)="selectPlayer(player)" [disabled]="player.isDead">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
-          <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Tuer' }}</div>
+          <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Voter' }}</div>
           <p class="player-name">{{ capitalizeFirstLetter(player.name) }}</p>
+          <p *ngIf="player.name === players[0].name">(vous)</p>
+          <p *ngIf="playerPower === Power.Loup && player.power === Power.Loup && player.name !== players[0].name">(loup-garou)</p>
         </button>
       </div>
     </section>
 
     <section class="conversation">
       <div class="player-data">
-        <span class="player-role-label">Ton rôle : </span>
+        <span class="player-role-label">Ton rôle : </span>&nbsp;
         <span class="player-role-text">{{playerPower}}</span>
       </div>
       <div class="messages">
@@ -29,8 +31,7 @@
     <div class="modal-content">
       <h2>Game Over</h2>
       <p>Le jeu est terminé.</p>
-      <p *ngIf="gameStatus === GameStatusEnum.werewolfesWon">Les loups-garous ont gagné ! Bravo !</p>
-      <p *ngIf="gameStatus === GameStatusEnum.villagersWon">Les villageois ont gagné ! Bravo !</p>
+      <p>{{getEndMessage()}}</p>
       <button (click)="initializeGame()">Rejouer</button>
     </div>
   </div>
