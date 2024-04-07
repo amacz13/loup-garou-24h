@@ -178,12 +178,32 @@ export class HomeComponent implements OnInit, AfterViewChecked {
           filteredPlayers = this.players.filter(player => player.name !== otherLover.name);
         }
       }
-      this.gameStatus = checkIfGameIsOver(filteredPlayers);
-      this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
-      // si chasseur, alors tuer quelqu'un
+      if (myPlayer.power === 'Chasseur') {
+        this.messages.push({author: "MJ", content: `${myPlayer.name} était chasseur, il choisit un jour qu'il emporte avec lui dans sa tombe...`});
+        this.apiService.getHunter(filteredPlayers).then(res => {
+          if (res.name) {
+            const victim =  this.players.find(p => p.name === res.name);
+            if (victim) {
+              victim.isDead = true;
+              this.messages.push({author: "MJ", content: `Le chasseur a choisi de tuer ${res.name} !`});
+              filteredPlayers = this.players.filter(player => player.name !== victim.name);
+            }
+          }
+          this.gameStatus = checkIfGameIsOver(filteredPlayers);
+          this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
 
-      if(this.isPlayerDead){
-        this.playerVote(!isWolfSelection);
+          if(this.isPlayerDead){
+            this.playerVote(!isWolfSelection);
+          }
+        });
+      } else {
+        this.gameStatus = checkIfGameIsOver(filteredPlayers);
+        this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
+        // si chasseur, alors tuer quelqu'un
+
+        if(this.isPlayerDead){
+          this.playerVote(!isWolfSelection);
+        }
       }
     }
   }

@@ -1,7 +1,7 @@
 <header>
   <div class="dayNightCard">
-    <img [src]="gameStep === GameStep.jour || GameStep.chasseur ? './../../../assets/sun.png' : './../../../assets/moon.png'">
-    <p>{{gameStep === GameStep.jour || GameStep.chasseur ? "Jour" : "Nuit"}}</p>
+    <img [src]="gameStep === GameStep.jour ? './../../../assets/sun.png' : './../../../assets/moon.png'">
+    <p>{{gameStep === GameStep.jour ? "Jour" : "Nuit"}}</p>
   </div>
   <div class="title">
     <h1>Jeu du loup</h1>

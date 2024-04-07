@@ -22,6 +22,7 @@ export class ApiService {
   private night: string = 'nuit';
   private day: string = 'jour';
   private cupidon: string = 'cupidon';
+  private chasseur: string = 'chasseur';
   constructor(private httpClient: HttpClient) {}
 
   getNight(players: Player[], target?: string): Promise<EventResponse | undefined> {
@@ -34,5 +35,9 @@ export class ApiService {
 
   getCupid(players: Player[]): Promise<any> {
     return this.httpClient.post<any>(this.url + this.cupidon, {players: players}).toPromise();
+  }
+
+  getHunter(players: Player[]): Promise<any> {
+    return this.httpClient.post<any>(this.url + this.chasseur, {players: players}).toPromise();
   }
 }
