@@ -39,7 +39,7 @@
       <h2>Game Over</h2>
       <p>Le jeu est terminé.</p>
       <p>{{getEndMessage()}}</p>
-      <button (click)="initializeGame()">Rejouer</button>
+      <button class="replay-btn" (click)="initializeGame()">Rejouer</button>
     </div>
   </div>
   <div *ngIf="shouldChoosePower === true" class="modal">
@@ -59,12 +59,8 @@
           <p class="player-name">Voyante</p>
         </button>
         <button class="player" (click)="choosePower(Power.Cupidon)">
-          <img src="assets/characters/crystalball.png" alt="Cupidon" class="player-img">
+          <img src="assets/characters/cupid.png" alt="Cupidon" class="player-img">
           <p class="player-name">Cupidon</p>
-        </button>
-        <button class="player" (click)="choosePower(Power.Chasseur)">
-          <img src="assets/characters/crystalball.png" alt="Chasseur" class="player-img">
-          <p class="player-name">Chasseur</p>
         </button>
       </div>
     </div>
