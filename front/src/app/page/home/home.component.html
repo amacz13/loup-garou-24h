@@ -7,7 +7,7 @@
         <button class="player" *ngFor="let player of players" (click)="selectPlayer(player)">
           <img src="{{ player.image }}" alt="{{ player.name }}" class="player-img">
           <div class="overlay" [class.dead]="player.isDead">{{ player.isDead ? player.power : 'Tuer' }}</div>
-          <p>{{ player.name }}</p>
+          <p class="player-name">{{ player.name }}</p>
         </button>
       </div>
     </section>
@@ -42,6 +42,3 @@
     </div>
   </div>
 </main>
-<footer>
-  <p>&copy; 2024 Werewolf Game</p>
-</footer>
