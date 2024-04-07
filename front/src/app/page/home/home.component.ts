@@ -38,6 +38,7 @@ export class HomeComponent implements OnInit {
   gameStep: GameStep = GameStep.jour;
   shouldChoosePower: boolean = true;
   playerName: string | undefined = undefined;
+  isPlayerDead: boolean = false;
 
   constructor(private apiService: ApiService) {
 
@@ -67,22 +68,11 @@ export class HomeComponent implements OnInit {
     this.instruction = "Votez pour tuer un loup :";
     this.gameStep = GameStep.jour;
     this.playerName = this.players[0].name;
+    this.isPlayerDead = false;
   }
-
-  subscribtionCall (response: any) {
-
-    const myPlayer = this.players.find(p => p.name === response.name);
-    this.messages.push(`MJ: ${response.message} ${response.name}`);
-    if(myPlayer){
-      myPlayer.isDead = true;
-      const filteredPlayers = this.players.filter(player => !player.isDead)
-      this.gameStatus = checkIfGameIsOver(filteredPlayers);
-    }
-  }
-
   playerVote(isWolf: boolean, player?: Player) {
 
-    const subscribtionCall = (response: EventResponse) => {
+    const subscriptionCall = (response: EventResponse) => {
 
       const myPlayer = this.players.find(p => p.name === response.name);
       this.messages.push(`MJ: ${response.message} ${response.name}`);
@@ -97,6 +87,10 @@ export class HomeComponent implements OnInit {
         myPlayer.isDead = true;
         const filteredPlayers = this.players.filter(player => !player.isDead)
         this.gameStatus = checkIfGameIsOver(filteredPlayers);
+        this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
+        if(this.isPlayerDead){
+          this.playerVote(!isWolf);
+        }
       }
     }
 
@@ -106,11 +100,13 @@ export class HomeComponent implements OnInit {
         if(player){
           this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
         }
-        this.apiService.getNight(filteredPlayers, player?.name).subscribe(subscribtionCall);
+        this.apiService.getNight(filteredPlayers, player?.name).subscribe(subscriptionCall);
       }
-      if(!isWolf && player){
-        this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
-        this.apiService.getDay(filteredPlayers, player.name).subscribe(subscribtionCall);
+      if(!isWolf){
+        if(player){
+          this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
+        }
+        this.apiService.getDay(filteredPlayers, player?.name).subscribe(subscriptionCall);
       }
     }
   };
