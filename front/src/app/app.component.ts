@@ -1,9 +1,10 @@
 import { NgFor } from '@angular/common';
 import { HttpClientModule } from "@angular/common/http";
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterOutlet } from "@angular/router";
 import { NgxSpinnerModule } from 'ngx-spinner';
+import {LoadService} from "./services/load.service";
 
 interface Player {
   name: string;
@@ -17,5 +18,9 @@ interface Player {
   styleUrls: ['./app.component.scss'],
   imports: [FormsModule, NgFor, NgxSpinnerModule, RouterOutlet, HttpClientModule]
 })
-export class AppComponent {}
+export class AppComponent {
+
+  loadService = inject(LoadService);
+
+}
 

@@ -1,4 +1,4 @@
-import {doDayVote, doNightVote, PlayerV2} from "./game-engine-v2.js";
+import {chooseCupidonLovers, doDayVote, doNightVote, PlayerV2} from "./game-engine-v2.js";
 
 const playersTest: PlayerV2[] = [
     {
@@ -62,7 +62,9 @@ async function doGameV2(playerList: PlayerV2[]) {
     console.log("Fin de partie")
 }
 
-await doGameV2(playersTest);
+//await doGameV2(playersTest);
 
 //doDayVote(playersTest).then(result => console.log('Résultat du vote de jour : ', result));
 //doNightVote(playersTest).then(result => console.log('Résultat du vote de nuit : ', result));
+
+chooseCupidonLovers(playersTest).then(r => console.log("Result : ",r))
