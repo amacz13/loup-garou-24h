@@ -8,6 +8,7 @@
     "server": "npx tsc && npx ts-node api",
     "server-mock": "npx tsc && npx ts-node api-mock",
     "debug": "npx tsc && npx ts-node debug",
+    "debug-v2": "npx tsc && npx ts-node debug-v2",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

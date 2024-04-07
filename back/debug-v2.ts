@@ -1,26 +1,41 @@
-import {doDayVote, doNightVote, Player} from "./game-engine.js";
+import {doDayVote, doNightVote, PlayerV2} from "./game-engine-v2.js";
 
-const playersTest: Player[] = [
+const playersTest: PlayerV2[] = [
     {
         name: "Léa",
         role: 'Villageois',
         personality: "Brave, Expressive",
+        isReal: false
     },{
         name: "Pierre",
         role: 'Loup Garou',
         personality: "Courageux, Audacieux",
+        isReal: false
     },{
         name: "Marie",
         role: 'Loup Garou',
         personality: "Timide, Prudente",
+        isReal: false
     },{
         name: "Martine",
         role: 'Villageois',
         personality: "Maline, Stratège",
+        isReal: false
     },{
         name: "Paul",
         role: 'Villageois',
         personality: "Idiot, Drôle",
+        isReal: false
+    },{
+        name: "Rémi",
+        role: 'Voyante',
+        personality: "Idiot, Drôle",
+        isReal: false
+    },{
+        name: "Jade",
+        role: 'Villageois',
+        personality: "Souriante, Dynamique",
+        isReal: false
     }
 ];
 
@@ -28,9 +43,9 @@ function getRandomPlayer(selectedPlayerNameList: string[]) {
     return selectedPlayerNameList[Math.floor(Math.random()*selectedPlayerNameList.length)];
 }
 
-async function doGame(playerList: Player[]) {
+async function doGameV2(playerList: PlayerV2[]) {
     console.log("Début de partie")
-    let players: Player[] = [...playerList];
+    let players: PlayerV2[] = [...playerList];
     do {
         const nightResult = await doNightVote(players);
         const eliminatedPlayerDuringNight = nightResult.selectedPlayerNameList.length > 1 ? getRandomPlayer(nightResult.selectedPlayerNameList) : nightResult.selectedPlayerNameList[0];
@@ -47,7 +62,7 @@ async function doGame(playerList: Player[]) {
     console.log("Fin de partie")
 }
 
-await doGame(playersTest);
+await doGameV2(playersTest);
 
 //doDayVote(playersTest).then(result => console.log('Résultat du vote de jour : ', result));
 //doNightVote(playersTest).then(result => console.log('Résultat du vote de nuit : ', result));
