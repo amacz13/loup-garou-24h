@@ -5,11 +5,13 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi
 import { provideClientHydration } from '@angular/platform-browser';
 import { routes } from './app.routes';
 import { InterceptorService } from './interceptor.service';
+import {provideAnimations} from "@angular/platform-browser/animations";
+import {NgxSpinnerModule} from "ngx-spinner";
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideClientHydration(), provideHttpClient(withFetch(),withInterceptorsFromDi()), {
+  providers: [provideRouter(routes), provideClientHydration(), provideAnimations(),  provideHttpClient(withFetch(),withInterceptorsFromDi(),), {
         provide: HTTP_INTERCEPTORS,
         useClass: InterceptorService,
         multi: true,
-    },]
+    },],
 };

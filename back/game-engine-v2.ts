@@ -5,9 +5,10 @@ import {getLlama, Llama, LlamaChatSession, LlamaLogLevel} from "node-llama-cpp";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const startPrompt = '<|system|>\n' +
     '</s>\n' +
-    '<|user|>'
+    '<|user|>';
 const endPrompt = '</s>\n' +
-    '<|assistant|>'
+    '<|assistant|>';
+const llama = await getLlama({logLevel: LlamaLogLevel.error});
 
 const engine = "zephyr-7b-beta.Q4_K_M.gguf";
 
@@ -64,8 +65,7 @@ function generateDayPrompt(player: PlayerV2, playerList: PlayerV2[], votesAsSet:
  */
 export async function doDayVote(playerList: PlayerV2[], playerVote?: string): Promise<ResultV2> {
     playerList = randomizePlayerArray(playerList);
-    console.log("☀️ Le jour se lève !")
-    const llama = await getLlama({logLevel: LlamaLogLevel.error});
+    console.log("☀️ Le jour se lève !");
     const votes = [];
     const votesAsSet = new Set<string>();
     if (playerVote) {
@@ -133,7 +133,7 @@ export async function doDayVote(playerList: PlayerV2[], playerVote?: string): Pr
     };
 }
 
-async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2, llama: Llama): Promise<PlayerV2> {
+async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2): Promise<PlayerV2> {
     try {
         const model = await llama.loadModel({
             modelPath: path.join(__dirname, "models", engine)
@@ -144,7 +144,7 @@ async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2,
         const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
         console.log("Clairvoyant res ",playerRes)
         const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
-        const seenPlayer = playerList.find(p => p.name === jsonRes.who);
+        const seenPlayer = playerList.find(p => p.name === jsonRes.who.toLowerCase().normalize("NFC"));
         return {
             ...clairvoyant,
             roleDetail: {
@@ -163,7 +163,6 @@ async function processClairvoyant(playerList: PlayerV2[], clairvoyant: PlayerV2,
 export async function doNightVote(playerList: PlayerV2[], playerVote?: string): Promise<NightResultV2> {
     playerList = randomizePlayerArray(playerList);
     console.log("🌙️ La nuit arrive !")
-    const llama = await getLlama({logLevel: LlamaLogLevel.error});
     const votes = [];
     if (playerVote) votes.push(playerVote);
     const result: NightResultV2 = {
@@ -176,7 +175,7 @@ export async function doNightVote(playerList: PlayerV2[], playerVote?: string): 
 
     const clairvoyant = playerList.find(p => p.role === 'Voyante' && !p.isReal);
     if (clairvoyant) {
-        result.updatedPlayerList = [...playerList.filter(p => p.role !== 'Voyante'), await processClairvoyant(playerList,clairvoyant,llama)];
+        result.updatedPlayerList = [...playerList.filter(p => p.role !== 'Voyante'), await processClairvoyant(playerList,clairvoyant)];
     }
 
     for (const wolf of wolves.filter(p => !p.isReal)) {
