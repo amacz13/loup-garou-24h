@@ -18,6 +18,11 @@ export interface Player {
   isReal: boolean;
 }
 
+interface Message {
+  author: string;
+  content: string;
+}
+
 @Component({
   standalone: true,
   selector: 'home-root',
@@ -27,7 +32,7 @@ export interface Player {
 })
 export class HomeComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollContainer') scrollContainer!: ElementRef;
-  messages: string[] = [];
+  messages: Message[] = [];
   newMessage: string = '';
   players: Player[] = [];
   gameStatus: gameStatus = gameStatus.running;
@@ -69,7 +74,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
   sendMessage() {
     if (this.newMessage.trim() !== '') {
-      this.messages.push(`You: ${this.newMessage}`);
+      this.messages.push({author: "You", content: this.newMessage});
       this.newMessage = '';
     }
   }
@@ -95,14 +100,14 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       const filteredPlayers = this.players.filter(player => !player.isDead)
       if(isWolfSelection){
         if(player){
-          this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
+          this.messages.push({author: "MJ", content: `Vous avez voté pour dévorer ${this.capitalizeFirstLetter(player.name)}.`});
         }
         return this.apiService.getNight(filteredPlayers, player?.name).then(response => {
           if (response) this.handleApiResponse(response,isWolfSelection);
         });
       } else {
         if(player){
-          this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
+          this.messages.push({author: "MJ", content: `Vous avez voté contre ${this.capitalizeFirstLetter(player.name)}.`});
         }
         return this.apiService.getDay(filteredPlayers, player?.name).then(response => {
           if (response) this.handleApiResponse(response,isWolfSelection);
@@ -114,11 +119,11 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
   handleApiResponse(response: EventResponse, isWolfSelection: boolean) {
     const myPlayer = this.players.find(p => p.name === response.name);
-    this.messages.push(`MJ: ${response.message} ${response.name}`);
+    this.messages.push({author: "MJ", content: `${response.message} ${response.name}`});
 
     response.reasons?.forEach(reason => {
       if(reason.reason !== "" && reason.playerName !== ""){
-        this.messages.push(`${reason.playerName} : ${reason.reason}`);
+        this.messages.push({author: reason.playerName, content: reason.reason});
       }
     })
 
@@ -165,7 +170,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   selectPlayer(player: Player){
     switch(this.gameStep){
         case GameStep.voyante:
-          this.messages.push(`MJ: Vous avez utilisé votre pouvoir de voyante : ${this.capitalizeFirstLetter(player.name)} est ${player.power}`);
+          this.messages.push({author: "MJ", content: `Vous avez utilisé votre pouvoir de voyante : ${this.capitalizeFirstLetter(player.name)} est ${player.power}`});
           this.goToNight();
           break;
         case GameStep.jour:

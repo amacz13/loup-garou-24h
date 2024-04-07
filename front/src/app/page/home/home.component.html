@@ -24,7 +24,13 @@
         <span class="player-role-text">{{playerPower}}</span>
       </div>
       <div class="messages" #scrollContainer [style.max-height.px]="maxHeight">
-        <div class="message" *ngFor="let message of messages">{{ message }}</div>
+        <div class="message" *ngFor="let message of messages">
+          <hr/>
+          <p [class.mj] = "message.author === 'MJ'">
+            <strong *ngIf="message.author !== 'MJ'">{{message.author}} : </strong>
+            {{message.content}}
+          </p>
+        </div>
       </div>
       <input (keyup.enter)="sendMessage()" type="text" placeholder="Type your message..." [(ngModel)]="newMessage">
       <button (click)="sendMessage()">Send</button>

@@ -60,6 +60,15 @@ footer {
 
 .message {
   margin-bottom: 0.5rem;
+  font-weight: 100;
+
+  strong{
+    font-weight: 900;
+  }
+
+  .mj{
+    font-style: italic;
+  }
 }
 
 input[type="text"], button {
