@@ -257,3 +257,71 @@ function randomizePlayerArray(array: any[]) {
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value)
 }
+
+export async function chooseCupidonLovers(playerList: PlayerV2[]) {
+    playerList = randomizePlayerArray(playerList);
+    console.log("❤️ C'est l'heure de Cupidon !")
+    const model = await llama.loadModel({
+        modelPath: path.join(__dirname, "models", engine)
+    });
+    const plContext = await model.createContext({batchSize: 0});
+    const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+    const playerPrompt = `Sélectionne deux joueurs différents parmi la liste suivante : ${playerList.map(p => p.name).join(',')}. Réponds avec un JSON de la forme : { player1: 'Le premier joueur sélectionné', player2: 'Le deuxième joueur sélectionné, qui est différent du premier' }. Réponds avec le JSON et rien d'autre avant ou après.`;
+    console.log(playerPrompt);
+    const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
+    console.log(playerRes);
+    try {
+        const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
+        const player1Name = jsonRes.player1.toLowerCase().normalize("NFC");
+        const player2Name = jsonRes.player2.toLowerCase().normalize("NFC");
+        const p1 = playerList.find(p => p.name.toLowerCase().normalize("NFC") === player1Name);
+        const p2 = playerList.find(p => p.name.toLowerCase().normalize("NFC") === player2Name);
+        if (p1 && p2) return [p1, p2];
+    } catch {
+        const curlyBracesInclusive = /\{([^}]+)\}/
+        const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive);
+        if (arrRes) {
+            const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+            const player1Name = jsonRes.player1.toLowerCase().normalize("NFC");
+            const player2Name = jsonRes.player2.toLowerCase().normalize("NFC");
+            const p1 = playerList.find(p => p.name.toLowerCase().normalize("NFC") === player1Name);
+            const p2 = playerList.find(p => p.name.toLowerCase().normalize("NFC") === player2Name);
+            if (p1 && p2) return [p1, p2];
+        }
+    }
+    return [];
+}
+
+export async function chooseHunterKill(playerList: PlayerV2[]) {
+    playerList = randomizePlayerArray(playerList);
+    console.log("🔫️ C'est l'heure du chasseur !")
+    const model = await llama.loadModel({
+        modelPath: path.join(__dirname, "models", engine)
+    });
+    const plContext = await model.createContext({batchSize: 0});
+    const plSession = new LlamaChatSession({contextSequence: plContext.getSequence()});
+    const playerPrompt = `Sélectionne un joueur dans la liste suivante : ${playerList.map(p => p.name).join(',')}. Réponds avec un JSON de la forme : { player: 'Le joueur sélectionné' }. Réponds avec le JSON et rien d'autre avant ou après.`;
+    console.log(playerPrompt);
+    const playerRes = await plSession.prompt(playerPrompt, {temperature: 0.1});
+    console.log(playerRes);
+    try {
+        const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
+        const playerName = jsonRes.player.toLowerCase().normalize("NFC");
+        return playerList.find(p => p.name.toLowerCase().normalize("NFC") === playerName);
+    } catch {
+        const curlyBracesInclusive = /\{([^}]+)\}/
+        const arrRes = playerRes.replace("\n","").match(curlyBracesInclusive);
+        if (arrRes) {
+            const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
+            const playerName = jsonRes.player.toLowerCase().normalize("NFC");
+            return playerList.find(p => p.name.toLowerCase().normalize("NFC") === playerName);
+        }
+    }
+    return undefined;
+}
+
+export async function chooseClairvoyantChoice(playerList: PlayerV2[], clairvoyant: PlayerV2): Promise<PlayerV2> {
+    playerList = randomizePlayerArray(playerList);
+    console.log("🔎 C'est l'heure de la voyante !")
+    return processClairvoyant(playerList,clairvoyant);
+}

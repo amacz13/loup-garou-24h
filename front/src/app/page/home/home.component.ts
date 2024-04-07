@@ -7,6 +7,7 @@ import { Power, Role } from '../../entity/player.model';
 import { assignRolesToPlayers, initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 import { GameStep } from '../../utils/game-steps.utils';
+import {LoadService} from "../../services/load.service";
 
 export interface Player {
   name: string;
@@ -50,7 +51,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   playerName: string | undefined = undefined;
   isPlayerDead: boolean = false;
 
-  constructor(private apiService: ApiService) {
+  constructor(private apiService: ApiService, private loadService: LoadService) {
 
   }
 
@@ -105,6 +106,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         if(player){
           this.messages.push({author: "MJ", content: `Vous avez voté pour dévorer ${this.capitalizeFirstLetter(player.name)}.`});
         }
+        this.loadService.state.set("night");
         return this.apiService.getNight(filteredPlayers, player?.name).then(response => {
           if (response) this.handleApiResponse(response,isWolfSelection);
         });
@@ -112,6 +114,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         if(player){
           this.messages.push({author: "MJ", content: `Vous avez voté contre ${this.capitalizeFirstLetter(player.name)}.`});
         }
+        this.loadService.state.set("day");
         return this.apiService.getDay(filteredPlayers, player?.name).then(response => {
           if (response) this.handleApiResponse(response,isWolfSelection);
         });

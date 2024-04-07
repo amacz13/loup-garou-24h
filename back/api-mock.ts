@@ -39,6 +39,26 @@ app.post('/nuit', (req: Request, res: Response) => {
     res.json({ name: randomPlayer.name, message: 'Les loups-garous ont décidé d\'éliminer' });
 });
 
+app.post('/chasseur', (req: Request, res: Response) => {
+    const players: Player[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
+    console.log(players);
+    const randomPlayer = getRandomPlayer(players); // Obtenir un joueur aléatoire
+    res.json({ name: randomPlayer.name, message: 'Le chasseur tue' });
+});
+
+app.post('/cupidon', (req: Request, res: Response) => {
+    let players: Player[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
+    console.log(players);
+    const firstLover = getRandomPlayer(players); // Obtenir un joueur aléatoire
+    const lovers: Player[] = [];
+    lovers.push(firstLover);
+    players = players.filter(p => p.name !== firstLover.name)
+    const secondLover = getRandomPlayer(players); // Obtenir un joueur aléatoire
+    lovers.push(secondLover);
+    res.json({ lovers: lovers, message: 'Cupidon a désigné deux amoureux' });
+});
+
+
 // Démarrer le serveur sur le port 3000
 app.listen(3000, () => {
     console.log('Le serveur écoute sur le port 3000');
