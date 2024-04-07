@@ -9,6 +9,18 @@
   src: url('assets/fonts/RubikScribble-Regular.ttf');
 }
 
+@font-face {
+  font-family: 'Rowdies';
+  src: url('assets/fonts/Rowdies-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'Burbank';
+  src: url('assets/fonts/Burbank-Big-Condensed-Bold-Font.otf');
+}
+
 body {
   margin: 0;
+  background: #ffefba;
+  background: linear-gradient(to right, #ffefba, #ffffff);
 }

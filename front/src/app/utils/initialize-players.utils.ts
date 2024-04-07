@@ -1,4 +1,3 @@
-import { log } from "console";
 import { Role, Power } from "../entity/player.model";
 import { Player } from "../page/home/home.component";
 
@@ -29,14 +28,14 @@ import { Player } from "../page/home/home.component";
 export function initializePlayers(players: Array<Player>) {
 
   const playersNamesAndImages: Array<{name: string, image: string}> = [
-    { name: 'Aphrodite', image: 'aphrodite.png' },
-    { name: 'Apollon', image: 'apollo.png' },
-    { name: 'Arès', image: 'ares.png' },
-    { name: 'Artémis', image: 'artemis.png' },
-    { name: 'Athéna', image: 'athena.png' },
-    { name: 'Hadès', image: 'hades.png' },
-    { name: 'Hermès', image: 'hermes.png' },
-    { name: 'Poséidon', image: 'poseidon.png' }
+    { name: 'marguerite', image: 'aphrodite.png' },
+    { name: 'gerard', image: 'apollo.png' },
+    { name: 'michel', image: 'ares.png' },
+    { name: 'jocelyne', image: 'artemis.png' },
+    { name: 'myrtille', image: 'athena.png' },
+    { name: 'julien', image: 'hades.png' },
+    { name: 'florent', image: 'hermes.png' },
+    { name: 'pascal', image: 'poseidon.png' }
   ];
 
   const shuffled: Array<{name: string, image: string}> = shuffleArray(playersNamesAndImages);

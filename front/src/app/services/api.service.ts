@@ -27,7 +27,7 @@ export class ApiService {
     return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target});
   }
 
-  getDay(players: Player[], target: string): Observable<EventResponse> {
+  getDay(players: Player[], target?: string): Observable<EventResponse> {
     return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target});
   }
 }
