@@ -10,7 +10,3 @@ export enum Power {
   Loup = "Loup Garou",
   Simple = "Simple villageois"
 }
-export interface Player {
-  name: string
-  role: Role
-}

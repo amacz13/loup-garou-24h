@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
-import { Player } from "../entity/player.model";
 import { Observable } from 'rxjs';
+import { Player } from '../page/home/home.component';
 
 interface PlayerReason {
   playerName: string;
@@ -27,7 +27,7 @@ export class ApiService {
     return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target}).toPromise();
   }
 
-  getDay(players: Player[], target?: string): Promise<EventResponse | undefined> {
-    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target}).toPromise();
+  getDay(players: Player[], knownPlayerList: Player[], target?: string): Promise<EventResponse | undefined> {
+    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, knownPlayerList, target: target}).toPromise();
   }
 }
