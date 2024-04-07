@@ -7,6 +7,7 @@ import { Power, Role } from '../../entity/player.model';
 import { assignRolesToPlayers, initializePlayers } from '../../utils/initialize-players.utils';
 import { checkIfGameIsOver, gameStatus, vote } from '../../utils/vote.utils';
 import { GameStep } from '../../utils/game-steps.utils';
+import {response} from "express";
 
 export interface Player {
   name: string;
@@ -87,46 +88,49 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     this.playerName = this.players[0].name;
     this.isPlayerDead = false;
   }
-  playerVote(isWolf: boolean, player?: Player) {
-
-    const subscriptionCall = (response: EventResponse) => {
-
-      const myPlayer = this.players.find(p => p.name === response.name);
-      this.messages.push(`MJ: ${response.message} ${response.name}`);
-
-      response.reasons?.forEach(reason => {
-        if(reason.reason !== "" && reason.playerName !== ""){
-          this.messages.push(`${reason.playerName} : ${reason.reason}`);
-        }
-      })
-
-      if(myPlayer){
-        myPlayer.isDead = true;
-        const filteredPlayers = this.players.filter(player => !player.isDead)
-        this.gameStatus = checkIfGameIsOver(filteredPlayers);
-        this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
-        if(this.isPlayerDead){
-          this.playerVote(!isWolf);
-        }
-      }
-    }
+  playerVote(isWolfSelection: boolean, player?: Player) {
 
     if(this.gameStatus === gameStatus.running){
       const filteredPlayers = this.players.filter(player => !player.isDead)
-      if(isWolf){
+      if(isWolfSelection){
         if(player){
           this.messages.push(`MJ: vous avez voté pour dévorer ${player.name}.`);
         }
-        this.apiService.getNight(filteredPlayers, player?.name).subscribe(subscriptionCall);
-      }
-      if(!isWolf){
+        return this.apiService.getNight(filteredPlayers, player?.name).then(response => {
+          if (response) this.handleApiResponse(response,isWolfSelection);
+        });
+      } else {
         if(player){
           this.messages.push(`MJ: vous avez voté contre ${player.name}.`);
         }
-        this.apiService.getDay(filteredPlayers, player?.name).subscribe(subscriptionCall);
+        return this.apiService.getDay(filteredPlayers, player?.name).then(response => {
+          if (response) this.handleApiResponse(response,isWolfSelection);
+        });
       }
     }
+    return Promise.resolve()
   };
+
+  handleApiResponse(response: EventResponse, isWolfSelection: boolean) {
+    const myPlayer = this.players.find(p => p.name === response.name);
+    this.messages.push(`MJ: ${response.message} ${response.name}`);
+
+    response.reasons?.forEach(reason => {
+      if(reason.reason !== "" && reason.playerName !== ""){
+        this.messages.push(`${reason.playerName} : ${reason.reason}`);
+      }
+    })
+
+    if(myPlayer){
+      myPlayer.isDead = true;
+      const filteredPlayers = this.players.filter(player => !player.isDead)
+      this.gameStatus = checkIfGameIsOver(filteredPlayers);
+      this.isPlayerDead = this.isPlayerDead || myPlayer.name === this.players[0].name;
+      if(this.isPlayerDead){
+        this.playerVote(!isWolfSelection);
+      }
+    }
+  }
 
   capitalizeFirstLetter(str?: string): string | undefined {
     if(!str){
@@ -141,7 +145,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       this.gameStep = GameStep.loups;
     }
     else{
-      this.playerVote(true);
+      setTimeout(() => this.playerVote(true), 1000);
     }
   }
 
@@ -160,8 +164,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         this.gameStep = GameStep.jour;
         break;*/
         case GameStep.jour:
-          this.playerVote(false, player);
-          this.goToNight();
+          this.playerVote(false, player).then(() => this.goToNight())
+          //this.goToNight();
           break;
         case GameStep.loups:
           this.playerVote(true, player);
