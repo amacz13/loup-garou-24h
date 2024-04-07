@@ -12,6 +12,7 @@ const llama = await getLlama({logLevel: LlamaLogLevel.error});
 
 
 const engine = "zephyr-7b-beta.Q4_K_M.gguf";
+const funnyMode = false;
 
 export interface Player {
     name: string;
@@ -65,7 +66,7 @@ export async function doDayVote(playerList: Player[], playerVote?: string): Prom
             try {
                 const jsonRes = JSON.parse(playerRes.replace("<|assistant|>","").replace("<|user|>",""));
                 target = jsonRes.who.toLowerCase().normalize("NFC");
-                reason = jsonRes.why;
+                reason = funnyMode ? await funnyReason(jsonRes.why,plSession) : jsonRes.why;
                 votesAsSet.add(target);
             } catch {
                 const curlyBracesInclusive = /\{([^}]+)\}/
@@ -73,7 +74,7 @@ export async function doDayVote(playerList: Player[], playerVote?: string): Prom
                 if (arrRes) {
                     const jsonRes = JSON.parse(arrRes[0].replace("<|assistant|>","").replace("<|user|>",""));
                     target = jsonRes.who.toLowerCase().normalize("NFC");
-                    reason = jsonRes.why;
+                    reason = funnyMode ? await funnyReason(jsonRes.why,plSession) : jsonRes.why;
                     votesAsSet.add(target);
                 }
             }
@@ -200,4 +201,8 @@ function randomizePlayerArray(array: any[]) {
     return array.map(value => ({ value, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
         .map(({ value }) => value)
+}
+
+async function funnyReason(reason: string, plSession: LlamaChatSession) {
+    return await plSession.prompt("Reformule de façon hilarante", {temperature: 0.8});
 }
