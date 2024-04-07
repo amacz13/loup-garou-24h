@@ -8,7 +8,6 @@ import { Player } from "../page/home/home.component";
 
   // Function to assign roles
   function assignRole(index: number, chosenPower: Power): [Role, Power] {
-    // écrire les trois rôles et pouvoirs en fonction de ceux de la personne qui joue
     if (index === 0) {
       return [chosenPower === Power.Loup ? Role.Werewolf : Role.Villager, chosenPower];
     } else if(index === 1) {
@@ -16,7 +15,7 @@ import { Player } from "../page/home/home.component";
     } else if(index === 2) {
       return [Role.Werewolf, Power.Loup];
     }  else if(index === 3) {
-      return [Role.Villager, Power.Voyante];
+      return chosenPower === Power.Voyante ?  [Role.Villager, Power.Simple] : [Role.Villager, Power.Voyante]
     }  else if(index === 4) {
       return [Role.Villager, Power.Sorciere];
     } else if(index === 5) {
