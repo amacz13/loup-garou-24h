@@ -1,13 +1,13 @@
 export enum Role {
   Villager = "Villageois",
-  Werewolf = "Loup-garou"
+  Werewolf = "Loup Garou"
 }
 
 export enum Power {
   Voyante = "Voyante",
   Sorciere = "Sorcière",
   Salvateur = "Salvateur",
-  Loup = "Loup-garou",
+  Loup = "Loup Garou",
   Simple = "Simple villageois"
 }
 export interface Player {

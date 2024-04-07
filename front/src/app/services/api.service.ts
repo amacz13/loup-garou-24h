@@ -23,11 +23,11 @@ export class ApiService {
   private day: string = 'jour';
   constructor(private httpClient: HttpClient) {}
 
-  getNight(players: Player[], target?: string): Observable<EventResponse> {
-    return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target});
+  getNight(players: Player[], target?: string): Promise<EventResponse | undefined> {
+    return this.httpClient.post<EventResponse>(this.url + this.night, {players: players, target: target}).toPromise();
   }
 
-  getDay(players: Player[], target?: string): Observable<EventResponse> {
-    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target});
+  getDay(players: Player[], target?: string): Promise<EventResponse | undefined> {
+    return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target}).toPromise();
   }
 }
