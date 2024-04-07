@@ -292,7 +292,7 @@ export async function chooseCupidonLovers(playerList: PlayerV2[]): Promise<Playe
     return [];
 }
 
-export async function chooseHunterKill(playerList: PlayerV2[]): Promise<PlayerV2> {
+export async function chooseHunterKill(playerList: PlayerV2[]): Promise<PlayerV2 | undefined> {
     playerList = randomizePlayerArray(playerList);
     console.log("🔫️ C'est l'heure du chasseur !")
     const model = await llama.loadModel({
