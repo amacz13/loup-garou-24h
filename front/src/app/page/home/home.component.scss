@@ -14,10 +14,11 @@ main {
 
 .container {
   display: flex;
-  gap: 60px;
+  padding-top: 2rem;
+  gap: 4rem;
   justify-content: space-between;
-  width: 80%;
-  max-width: 800px;
+  width: 70%;
+  max-width: 1100px;
 }
 
 .players {
@@ -38,16 +39,18 @@ footer {
 
 .conversation {
   display: flex;
-  margin-top: 60px;
+  margin-top: 1rem;
   flex-direction: column;
   align-items: center;
 }
 
 .messages {
   height: 100%;
-  max-height: 400px;
-  width: 300px; /* Adjust width as needed */
-  border: 1px solid #ccc;
+  background: white;
+  width: 400px;
+  border: 0.3rem solid #000A45;
+  filter: drop-shadow(0.5rem 0.5rem 0px #000A45);
+  border-radius: 0.5rem;
   overflow-y: auto;
   margin-bottom: 1rem;
   padding: 1rem;
@@ -65,7 +68,7 @@ input[type="text"], button {
   .player-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.8rem;
+    gap: 3rem;
   }
 
   .player {
@@ -102,7 +105,9 @@ input[type="text"], button {
       opacity: 0;
       transition: opacity 0.3s ease;
       border-radius: 0rem;
-      font-size: medium;
+      font-family: 'Burbank', sans-serif;
+      font-size: 3rem;
+      text-shadow: 0.1rem 0.1rem 0.1rem #000A45;
 
       &:hover, &.dead {
         opacity: 1;
@@ -111,7 +116,10 @@ input[type="text"], button {
 
     p {
       text-align: center;
-      margin-top: 5px;
+      font-family: 'Burbank', sans-serif;
+      font-size: 1.5rem;
+      color: #000A45;
+      margin-top: 1rem;
     }
   }
 }
@@ -136,8 +144,10 @@ input[type="text"], button {
 }
 
 .player-title {
-  font-family: 'RubikScribble', sans-serif;
+  font-family: 'Rowdies', sans-serif;
+  font-weight: 800;
   font-size: 2rem;
+  color: #000A45;
 }
 
 .player-data {
