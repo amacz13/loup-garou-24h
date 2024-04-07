@@ -8,6 +8,8 @@
     <p>
       @if (loadService.state() === 'day') {
         Les autres villageois font leur choix
+      } @else if (loadService.state() === 'cupid') {
+        Cupidon lie deux joueurs par le pouvoir de l'amour ❤️
       } @else {
         La nuit est en cours. Prenez garde aux loups 🐺!
       }

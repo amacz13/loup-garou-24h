@@ -21,6 +21,7 @@ export class ApiService {
   private url: string = '/api/';
   private night: string = 'nuit';
   private day: string = 'jour';
+  private cupidon: string = 'cupidon';
   constructor(private httpClient: HttpClient) {}
 
   getNight(players: Player[], target?: string): Promise<EventResponse | undefined> {
@@ -29,5 +30,9 @@ export class ApiService {
 
   getDay(players: Player[], target?: string): Promise<EventResponse | undefined> {
     return this.httpClient.post<EventResponse>(this.url + this.day, {players: players, target: target}).toPromise();
+  }
+
+  getCupid(players: Player[]): Promise<any> {
+    return this.httpClient.post<any>(this.url + this.cupidon, {players: players}).toPromise();
   }
 }

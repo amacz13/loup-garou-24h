@@ -1,5 +1,7 @@
 export enum GameStep {
   voyante,
   jour,
-  loups
+  loups,
+  chasseur,
+  cupidon
 }

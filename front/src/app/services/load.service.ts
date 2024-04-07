@@ -4,5 +4,5 @@ import {Injectable, signal} from "@angular/core";
   providedIn: 'root'
 })
 export class LoadService {
-  state = signal<'day'|'night'>('day');
+  state = signal<'day'|'night'|'cupid'>('day');
 }

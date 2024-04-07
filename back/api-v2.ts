@@ -1,7 +1,8 @@
 // Importer le module Express
-import express, {Request, Response } from "express";
+import express, { Request, Response } from "express";
 import bodyParser from "body-parser";
-import { PlayerV2, ResultV2, doDayVote, doNightVote } from "./game-engine-v2.js";
+import { PlayerV2, ResultV2, doDayVote, doNightVote, chooseCupidonLovers, chooseHunterKill } from "./game-engine-v2.js";
+import { Player } from "./game-engine.js";
 
 // Créer une application Express
 const app = express();
@@ -30,22 +31,46 @@ app.get('/step/:stepNumber', (req: Request, res: Response) => {
     res.send(`Numéro d'étape: ${stepNumber}`);
 });
 
+app.post('/chasseur', (req: Request, res: Response) => {
+    const players: PlayerV2[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
+    chooseHunterKill(players).then((victim) => {
+        if(victim) {
+            res.json({ name: victim.name, message: 'Le chasseur tue' });
+        } else {
+            res.json({ name: undefined, message: 'Le chasseur a tué personne' });
+        }
+    }).catch((error) => {
+        console.error("Something went wrong", error);
+        res.status(500).send("Une erreur s'est produite lors de la récupération des données.");
+    });
+});
+
+app.post('/cupidon', (req: Request, res: Response) => {
+    const players: PlayerV2[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
+    chooseCupidonLovers(players).then((lovers: PlayerV2[]) => {
+        res.json({ lovers: lovers, message: 'Cupidon a désigné deux amoureux' })
+    }).catch((error) => {
+        console.error("Something went wrong", error);
+        res.status(500).send("Une erreur s'est produite lors de la récupération des données.");
+    });
+});
+
 app.post('/jour', (req: Request, res: Response) => {
     const players: PlayerV2[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
-    const target:string = req.body.target;
+    const target: string = req.body.target;
     for (let player of players) {
         if (player.power) {
             player.role = player.power;
         }
     }
     console.log(players);
-    doDayVote(players, target).then( (response : ResultV2) => {
+    doDayVote(players, target).then((response: ResultV2) => {
         console.log(response);
         let winner: string = response.selectedPlayerNameList[0];
-        if(response.selectedPlayerNameList.length > 1 ) {
+        if (response.selectedPlayerNameList.length > 1) {
             // On a une égalité, on prends un joueur au pif parmis l'égalité
             winner = getRandomPlayerName(response.selectedPlayerNameList);
-        } 
+        }
         res.json({ name: winner, message: 'Le village a désigné', reasons: response.reasons });
     }).catch((error) => {
         console.error("Something went wrong", error);
@@ -55,7 +80,7 @@ app.post('/jour', (req: Request, res: Response) => {
 
 app.post('/nuit', (req: Request, res: Response) => {
     const players: PlayerV2[] = req.body.players; // Récupérer le tableau de joueurs depuis le corps de la requête
-    const target:string = req.body.target;
+    const target: string = req.body.target;
     for (let player of players) {
         if (player.power) {
             player.role = player.power;
@@ -63,14 +88,14 @@ app.post('/nuit', (req: Request, res: Response) => {
     }
     console.log(players);
     console.log(target);
-    doNightVote(players, target).then((response : ResultV2) => {
+    doNightVote(players, target).then((response: ResultV2) => {
         console.log(response);
         let winner: string = response.selectedPlayerNameList[0];
-        if(response.selectedPlayerNameList.length > 1 ) {
+        if (response.selectedPlayerNameList.length > 1) {
             // On a une égalité, on prends un joueur au pif parmis l'égalité
             winner = getRandomPlayerName(response.selectedPlayerNameList);
-        } 
-        res.json({ name: winner, message: 'Les loups-garous ont décidé d\'éliminer'});
+        }
+        res.json({ name: winner, message: 'Les loups-garous ont décidé d\'éliminer' });
     });
 });
 
